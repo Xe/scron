@@ -5,7 +5,10 @@ Single daemon, config and initscript.
 Logs to stdout and syslog.
 
 usage:
-dcron [-h = help] [-d = daemon]
+usage: dcron [options]
+-h              help
+-d              daemon
+-f <file>       config file
 
 config:
 # min,hour,mday,mon,wday,command
