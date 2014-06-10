@@ -4,13 +4,14 @@
 #include <time.h>
 #include <ctype.h>
 #include <unistd.h>
+#include <syslog.h>
 
 #define MAXLEN 100
 #define SLEEP 60
 
 static const char config[] = "cron.conf";
 
-int main(void) {
+int main(int argc, char *argv[]) {
 	FILE *fp;
 	char line[MAXLEN+1];
 	char *col;
@@ -20,13 +21,19 @@ int main(void) {
 	time_t rawtime;
 	struct tm *tmtime;
 
+	if (argc > 1 && !strcmp("-h", argv[1])) {
+		fprintf(stderr, "usage: %s [-h = help] [-d = daemon]\n", argv[0]);
+		return 1;
+	} else if (argc > 1 && !strcmp("-d", argv[1])) {
+		daemon(1, 0);
+	}
+	
+	openlog(argv[0], LOG_CONS | LOG_PID, LOG_LOCAL1);
+	syslog(LOG_NOTICE, "started by user %d", getuid());
+
 	while (1) {
 		rawtime = time(NULL);
 		tmtime = localtime(&rawtime);
-
-		printf("dcron %.2d:%.2d %.2d.%.2d.%.4d\n",
-				tmtime->tm_hour, tmtime->tm_min,
-				tmtime->tm_mday, tmtime->tm_mon, tmtime->tm_year+1900);
 
 		fp = fopen(config, "r");
 		if (fp == NULL) {
@@ -84,7 +91,12 @@ int main(void) {
 						if (mday == -1 || mday == tmtime->tm_mday) {
 							if (mon == -1 || mon == tmtime->tm_mon) {
 								if (wday == -1 || wday == tmtime->tm_wday) {
+									printf("dcron %.2d:%.2d %.2d.%.2d.%.4d\n",
+											tmtime->tm_hour, tmtime->tm_min,
+											tmtime->tm_mday, tmtime->tm_mon, tmtime->tm_year+1900);
+
 									printf("run: %s", cmd);
+									syslog(LOG_NOTICE, "run: %s", cmd);
 									system(cmd);
 								}
 							}
@@ -95,6 +107,7 @@ int main(void) {
 		}
 		sleep(SLEEP);
 	}
+	closelog();
 	fclose(fp);
 	return 0;
 }

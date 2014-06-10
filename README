@@ -3,17 +3,10 @@ dcron - simple cron daemon
 This tool is not ready for use!
 
 info:
-Single daemon, single config file. One task per line. Tab is separator.
+Single daemon, single config file.
+Logs to stdout and syslog.
 
-example:
+config:
 # min,hour,mday,mon,wday,command
 *       *       *       *       *       exec echo minute passed
-30      *       *       *       *       exec echo 30 min passed
-
-output:
-dcron 18:53 10.05.2014
-run: exec echo minute passed
-minute passed
-dcron 18:54 10.05.2014
-run: exec echo minute passed
-minute passed
+30      *       *       *       *       exec echo its half past
