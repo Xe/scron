@@ -25,7 +25,11 @@ int main(int argc, char *argv[]) {
 		fprintf(stderr, "usage: %s [-h = help] [-d = daemon]\n", argv[0]);
 		return 1;
 	} else if (argc > 1 && !strcmp("-d", argv[1])) {
-		daemon(1, 0);
+		if (daemon(1, 0) != 0) {
+			fprintf(stderr, "error: failed to daemonize\n");
+			syslog(LOG_NOTICE, "error: failed to daemonize\n");
+			return 1;
+		}
 	}
 
 	openlog(argv[0], LOG_CONS | LOG_PID, LOG_LOCAL1);
@@ -95,7 +99,10 @@ int main(int argc, char *argv[]) {
 						(wday == -1 || wday == tm->tm_wday)) {
 					printf("run: %s", cmd);
 					syslog(LOG_NOTICE, "run: %s", cmd);
-					system(cmd);
+					if (system(cmd) != 0) {
+						fprintf(stderr, "error: job failed\n");
+						syslog(LOG_NOTICE, "error: job failed\n");
+					}
 				}
 			}
 		}
