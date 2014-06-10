@@ -1,7 +1,5 @@
 dcron - simple cron daemon
 
-This tool is not ready for use!
-
 info:
 Single daemon, single config file.
 Logs to stdout and syslog.
@@ -11,5 +9,5 @@ dcron [-h = help] [-d = daemon]
 
 config:
 # min,hour,mday,mon,wday,command
-*       *       *       *       *       exec echo minute passed
-30      *       *       *       *       exec echo its half past
+10	6	*	*	*	exec ionice -n 2 updatedb
+20	6	*	*	*	exec nice -n 10 mandb --quiet

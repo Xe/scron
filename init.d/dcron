@@ -1,0 +1,5 @@
+#!/sbin/runscript
+
+command=/usr/bin/dcron
+command_args=-d
+name="dcron cron daemon"

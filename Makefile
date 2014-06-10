@@ -1,16 +1,15 @@
-CC=gcc
-CFLAGS=-Wall
-PREFIX=/usr
-BINDIR=${PREFIX}/bin
+CFLAGS=-O2 -Wall
 
 all: dcron
 
 install: dcron
-	mkdir -p ${DESTDIR}${BINDIR}
-	install -m 755 dcron ${DESTDIR}${BINDIR}
+	mkdir -p ${PREFIX}/bin
+	install -m 755 dcron ${PREFIX}/bin/
+	install -m 755 init.d/dcron /etc/init.d/
 
 uninstall:
-	rm -f ${DESTDIR}${BINDIR}/dcron
+	rm -f ${PREFIX}/dcron
+	rm /etc/init.d/dcron
 
 clean:
 	rm dcron
