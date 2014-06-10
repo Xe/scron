@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
 			continue;
 		}
 
-		while (fgets(line, MAXLEN+1, fp) != NULL) {
+		while (fgets(line, MAXLEN, fp) != NULL) {
 			if (line[1] != '\0' && line[0] != '\043') {
 				col = strtok(line,"\t");
 				i = 0;
@@ -81,35 +81,27 @@ int main(int argc, char *argv[]) {
 								wday = -1;
 							break;
 						case 5:
-							strncpy(cmd, col, MAXLEN+1);
+							strncpy(cmd, col, MAXLEN);
 							break;
 					}
 					col = strtok(NULL, "\t");
 					i++;
 				}
 
-				if (min == -1 || min == tm->tm_min) {
-					if (hour == -1 || hour == tm->tm_hour) {
-						if (mday == -1 || mday == tm->tm_mday) {
-							if (mon == -1 || mon == tm->tm_mon) {
-								if (wday == -1 || wday == tm->tm_wday) {
-									printf("dcron %.2d:%.2d %.2d.%.2d.%.4d\n",
-											tm->tm_hour, tm->tm_min,
-											tm->tm_mday, tm->tm_mon, tm->tm_year+1900);
-									printf("run: %s", cmd);
-									syslog(LOG_NOTICE, "run: %s", cmd);
-									system(cmd);
-								}
-							}
-						}
-					}
+				if ((min == -1 || min == tm->tm_min) &&
+						(hour == -1 || hour == tm->tm_hour) &&
+						(mday == -1 || mday == tm->tm_mday) &&
+						(mon == -1 || mon == tm->tm_mon) &&
+						(wday == -1 || wday == tm->tm_wday)) {
+					printf("run: %s", cmd);
+					syslog(LOG_NOTICE, "run: %s", cmd);
+					system(cmd);
 				}
 			}
 		}
 		fclose(fp);
 		sleep(SLEEP);
 	}
-	syslog(LOG_NOTICE, "quit");
 	closelog();
 	return 0;
 }
