@@ -21,6 +21,9 @@ int main(int argc, char *argv[]) {
 	time_t t;
 	struct tm *tm;
 
+	openlog(argv[0], LOG_CONS | LOG_PID, LOG_LOCAL1);
+	syslog(LOG_NOTICE, "start uid:%d", getuid());
+
 	if (argc > 1 && !strcmp("-h", argv[1])) {
 		fprintf(stderr, "usage: %s [-h = help] [-d = daemon]\n", argv[0]);
 		return 1;
@@ -31,9 +34,6 @@ int main(int argc, char *argv[]) {
 			return 1;
 		}
 	}
-
-	openlog(argv[0], LOG_CONS | LOG_PID, LOG_LOCAL1);
-	syslog(LOG_NOTICE, "start uid:%d", getuid());
 
 	while (1) {
 		t = time(NULL);
