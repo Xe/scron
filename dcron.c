@@ -9,7 +9,7 @@
 #define MAXLEN 100
 #define SLEEP 60
 
-static const char config[] = "cron.conf";
+static const char config[] = "/etc/dcron.conf";
 
 int main(int argc, char *argv[]) {
 	FILE *fp;
@@ -18,8 +18,8 @@ int main(int argc, char *argv[]) {
 	int min, hour, mday, mon, wday;
 	char cmd[MAXLEN+1];
 	int i;
-	time_t rawtime;
-	struct tm *tmtime;
+	time_t t;
+	struct tm *tm;
 
 	if (argc > 1 && !strcmp("-h", argv[1])) {
 		fprintf(stderr, "usage: %s [-h = help] [-d = daemon]\n", argv[0]);
@@ -32,8 +32,8 @@ int main(int argc, char *argv[]) {
 	syslog(LOG_NOTICE, "started by user %d", getuid());
 
 	while (1) {
-		rawtime = time(NULL);
-		tmtime = localtime(&rawtime);
+		t = time(NULL);
+		tm = localtime(&t);
 
 		fp = fopen(config, "r");
 		if (fp == NULL) {
@@ -86,14 +86,14 @@ int main(int argc, char *argv[]) {
 					i++;
 				}
 
-				if (min == -1 || min == tmtime->tm_min) {
-					if (hour == -1 || hour == tmtime->tm_hour) {
-						if (mday == -1 || mday == tmtime->tm_mday) {
-							if (mon == -1 || mon == tmtime->tm_mon) {
-								if (wday == -1 || wday == tmtime->tm_wday) {
+				if (min == -1 || min == tm->tm_min) {
+					if (hour == -1 || hour == tm->tm_hour) {
+						if (mday == -1 || mday == tm->tm_mday) {
+							if (mon == -1 || mon == tm->tm_mon) {
+								if (wday == -1 || wday == tm->tm_wday) {
 									printf("dcron %.2d:%.2d %.2d.%.2d.%.4d\n",
-											tmtime->tm_hour, tmtime->tm_min,
-											tmtime->tm_mday, tmtime->tm_mon, tmtime->tm_year+1900);
+											tm->tm_hour, tm->tm_min,
+											tm->tm_mday, tm->tm_mon, tm->tm_year+1900);
 
 									printf("run: %s", cmd);
 									syslog(LOG_NOTICE, "run: %s", cmd);

@@ -6,6 +6,9 @@ info:
 Single daemon, single config file.
 Logs to stdout and syslog.
 
+usage:
+dcron [-h = help] [-d = daemon]
+
 config:
 # min,hour,mday,mon,wday,command
 *       *       *       *       *       exec echo minute passed
