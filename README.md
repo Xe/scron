@@ -1,4 +1,0 @@
-dcron
-=====
-
-simple cron

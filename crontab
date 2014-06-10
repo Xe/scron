@@ -1,0 +1,6 @@
+# dcron
+
+# minute, hour, day of month, month, day of week, command
+41	16	*	*	*	exec nice emerge --sync --quiet
+42	16	*	*	*	exec nice mandb --quiet
+43	16	*	*	*	exec ionice -n2 updatedb
