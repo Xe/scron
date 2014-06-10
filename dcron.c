@@ -6,22 +6,24 @@
 #include <unistd.h>
 
 #define MAXLEN 100
+#define SLEEP 60
 
-static const char config[]  = "cron.conf";
+static const char config[] = "cron.conf";
 
 int main(void) {
 	FILE *fp;
 	char line[MAXLEN+1];
-	char cmd[MAXLEN+1];
 	char *col;
-	int i, min, hour, mday, mon, wday;
+	int min, hour, mday, mon, wday;
+	char cmd[MAXLEN+1];
+	int i;
 	time_t rawtime;
 	struct tm *tmtime;
 
 	while (1) {
 		rawtime = time(NULL);
 		tmtime = localtime(&rawtime);
-		
+
 		printf("dcron %.2d:%.2d %.2d.%.2d.%.4d\n",
 				tmtime->tm_hour, tmtime->tm_min,
 				tmtime->tm_mday, tmtime->tm_mon, tmtime->tm_year+1900);
@@ -29,19 +31,14 @@ int main(void) {
 		fp = fopen(config, "r");
 		if (fp == NULL) {
 			fprintf(stderr, "error: cant read %s\n", config);
-			sleep(60);
+			sleep(SLEEP);
 			continue;
 		}
 
 		while (fgets(line, MAXLEN+1, fp) != NULL) {
-			if (line[1] == '\0') {
-				// empty line
-			} else if (line[0] == '\043') {
-				// comment
-			} else {
-				// split line
-				i = 0;
+			if (line[1] != '\0' && line[0] != '\043') {
 				col = strtok(line,"\t");
+				i = 0;
 				while (col != NULL) {
 					switch (i) {
 						case 0:
@@ -78,18 +75,17 @@ int main(void) {
 							strncpy(cmd, col, MAXLEN+1);
 							break;
 					}
-					col = strtok (NULL, "\t");
+					col = strtok(NULL, "\t");
 					i++;
 				}
 
-				// run task
 				if (min == -1 || min == tmtime->tm_min) {
 					if (hour == -1 || hour == tmtime->tm_hour) {
 						if (mday == -1 || mday == tmtime->tm_mday) {
 							if (mon == -1 || mon == tmtime->tm_mon) {
 								if (wday == -1 || wday == tmtime->tm_wday) {
 									printf("run: %s", cmd);
-									// system(cmd);
+									system(cmd);
 								}
 							}
 						}
@@ -97,7 +93,7 @@ int main(void) {
 				}
 			}
 		}
-		sleep(60);
+		sleep(SLEEP);
 	}
 	fclose(fp);
 	return 0;
