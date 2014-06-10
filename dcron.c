@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
 	}
 	
 	openlog(argv[0], LOG_CONS | LOG_PID, LOG_LOCAL1);
-	syslog(LOG_NOTICE, "started by user %d", getuid());
+	syslog(LOG_NOTICE, "start uid:%d", getuid());
 
 	while (1) {
 		t = time(NULL);
@@ -107,6 +107,7 @@ int main(int argc, char *argv[]) {
 		}
 		sleep(SLEEP);
 	}
+	syslog(LOG_NOTICE, "quit");
 	closelog();
 	fclose(fp);
 	return 0;
