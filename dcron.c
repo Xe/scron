@@ -9,7 +9,7 @@
 #define MAXLEN 100
 #define SLEEP 60
 
-static const char config[] = "/etc/dcron.conf";
+char config[MAXLEN+1] = "/etc/dcron.conf";
 
 int main(int argc, char *argv[]) {
 	FILE *fp;
@@ -25,14 +25,22 @@ int main(int argc, char *argv[]) {
 	syslog(LOG_NOTICE, "start uid:%d", getuid());
 
 	if (argc > 1 && !strcmp("-h", argv[1])) {
-		fprintf(stderr, "usage: %s [-h = help] [-d = daemon]\n", argv[0]);
+		fprintf(stderr, "usage: %s [options]\n\n", argv[0]);
+
+		fprintf(stderr, "-h\t\thelp\n");
+		fprintf(stderr, "-d\t\tdaemon\n");
+		fprintf(stderr, "-f <file>\tconfig file\n");
 		return 1;
 	} else if (argc > 1 && !strcmp("-d", argv[1])) {
 		if (daemon(1, 0) != 0) {
 			fprintf(stderr, "error: failed to daemonize\n");
-			syslog(LOG_NOTICE, "error: failed to daemonize\n");
+			syslog(LOG_NOTICE, "error: failed to daemonize");
 			return 1;
 		}
+	} else if (argc > 2 && !strcmp("-f", argv[1])) {
+		strncpy(config, argv[2], MAXLEN);
+		printf("config: %s\n", config);
+		syslog(LOG_NOTICE, "config: %s", config);
 	}
 
 	while (1) {
@@ -92,6 +100,14 @@ int main(int argc, char *argv[]) {
 					i++;
 				}
 
+				if (min == 0 || hour == 0 || mday == 0 || mon == 0 ||
+						wday == 0 || cmd[0] == '\0' || cmd[1] == '\0') {
+					fprintf(stderr, "error: %s line %d\n", config, i);
+					syslog(LOG_NOTICE, "error: %s line %d", config, i);
+					sleep(SLEEP);
+					continue;
+				}
+
 				if ((min == -1 || min == tm->tm_min) &&
 						(hour == -1 || hour == tm->tm_hour) &&
 						(mday == -1 || mday == tm->tm_mday) &&
@@ -101,7 +117,7 @@ int main(int argc, char *argv[]) {
 					syslog(LOG_NOTICE, "run: %s", cmd);
 					if (system(cmd) != 0) {
 						fprintf(stderr, "error: job failed\n");
-						syslog(LOG_NOTICE, "error: job failed\n");
+						syslog(LOG_NOTICE, "error: job failed");
 					}
 				}
 			}
