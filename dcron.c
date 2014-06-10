@@ -3,6 +3,7 @@
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
+#include <signal.h>
 #include <unistd.h>
 #include <syslog.h>
 
@@ -11,8 +12,16 @@
 
 static const char config[] = "/etc/dcron.conf";
 
+FILE *fp;
+
+void inthandler(void) {
+	syslog(LOG_NOTICE, "quit");
+	closelog();
+	fclose(fp);
+	exit(0);
+}
+
 int main(int argc, char *argv[]) {
-	FILE *fp;
 	char line[MAXLEN+1];
 	char *col;
 	int min, hour, mday, mon, wday;
@@ -25,8 +34,11 @@ int main(int argc, char *argv[]) {
 		fprintf(stderr, "usage: %s [-h = help] [-d = daemon]\n", argv[0]);
 		return 1;
 	} else if (argc > 1 && !strcmp("-d", argv[1])) {
-		daemon(1, 0);
+		if (!daemon(1, 0))
+			return 1;
 	}
+
+	signal(SIGINT, inthandler);
 	
 	openlog(argv[0], LOG_CONS | LOG_PID, LOG_LOCAL1);
 	syslog(LOG_NOTICE, "start uid:%d", getuid());
@@ -41,6 +53,8 @@ int main(int argc, char *argv[]) {
 			sleep(SLEEP);
 			continue;
 		}
+
+		min = hour = mday = mon = wday = 0;
 
 		while (fgets(line, MAXLEN+1, fp) != NULL) {
 			if (line[1] != '\0' && line[0] != '\043') {
@@ -97,7 +111,8 @@ int main(int argc, char *argv[]) {
 
 									printf("run: %s", cmd);
 									syslog(LOG_NOTICE, "run: %s", cmd);
-									system(cmd);
+									if (system(cmd))
+										puts("ok");
 								}
 							}
 						}
@@ -107,8 +122,6 @@ int main(int argc, char *argv[]) {
 		}
 		sleep(SLEEP);
 	}
-	syslog(LOG_NOTICE, "quit");
-	closelog();
-	fclose(fp);
+	inthandler();
 	return 0;
 }
