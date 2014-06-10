@@ -1,7 +1,7 @@
 dcron - simple cron daemon
 
 info:
-Single daemon, single config file.
+Single daemon, config and initscript.
 Logs to stdout and syslog.
 
 usage:
