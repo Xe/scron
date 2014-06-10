@@ -14,7 +14,8 @@ static const char config[] = "/etc/dcron.conf";
 
 FILE *fp;
 
-void inthandler(void) {
+void inthandler(int sig) {
+	puts("quit");
 	syslog(LOG_NOTICE, "quit");
 	closelog();
 	fclose(fp);
@@ -39,13 +40,13 @@ int main(int argc, char *argv[]) {
 	}
 
 	signal(SIGINT, inthandler);
-	
 	openlog(argv[0], LOG_CONS | LOG_PID, LOG_LOCAL1);
 	syslog(LOG_NOTICE, "start uid:%d", getuid());
 
 	while (1) {
 		t = time(NULL);
 		tm = localtime(&t);
+		min = hour = mday = mon = wday = 0;
 
 		fp = fopen(config, "r");
 		if (fp == NULL) {
@@ -53,8 +54,6 @@ int main(int argc, char *argv[]) {
 			sleep(SLEEP);
 			continue;
 		}
-
-		min = hour = mday = mon = wday = 0;
 
 		while (fgets(line, MAXLEN+1, fp) != NULL) {
 			if (line[1] != '\0' && line[0] != '\043') {
@@ -108,11 +107,12 @@ int main(int argc, char *argv[]) {
 									printf("dcron %.2d:%.2d %.2d.%.2d.%.4d\n",
 											tm->tm_hour, tm->tm_min,
 											tm->tm_mday, tm->tm_mon, tm->tm_year+1900);
-
 									printf("run: %s", cmd);
 									syslog(LOG_NOTICE, "run: %s", cmd);
-									if (system(cmd))
+									if (system(cmd)) {
 										puts("ok");
+										syslog(LOG_NOTICE, "ok");
+									}
 								}
 							}
 						}
@@ -120,8 +120,9 @@ int main(int argc, char *argv[]) {
 				}
 			}
 		}
+		fclose(fp);
 		sleep(SLEEP);
 	}
-	inthandler();
+	inthandler(SIGINT);
 	return 0;
 }
