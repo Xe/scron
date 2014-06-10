@@ -4,6 +4,7 @@ all: dcron
 
 install: dcron
 	mkdir -p ${DESTDIR}/bin
+	mkdir -p ${DESTDIR}/etc/init.d
 	install -m 755 dcron ${DESTDIR}/bin/
 	install -m 755 init.d/dcron ${DESTDIR}/etc/init.d/
 	install -m 644 dcron.conf ${DESTDIR}/etc/
