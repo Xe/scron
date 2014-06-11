@@ -1,4 +1,4 @@
-CFLAGS=-O2 -Wall
+CFLAGS=-std=c99 -Wall -Wpedantic -Wextra
 
 all: dcron
 

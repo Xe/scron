@@ -9,14 +9,19 @@
 #define MAXLEN 100
 #define SLEEP 60
 
+// config file location
 char config[MAXLEN+1] = "/etc/dcron.conf";
+
+// implicit declaration of function 'daemon'
+int daemon(int nochdir, int noclose);
 
 int main(int argc, char *argv[]) {
 	FILE *fp;
+	char *argv0;
 	char line[MAXLEN+1];
+	char cmd[MAXLEN+1];
 	char *col;
 	int min, hour, mday, mon, wday;
-	char cmd[MAXLEN+1];
 	int i;
 	time_t t;
 	struct tm *tm;
@@ -24,25 +29,35 @@ int main(int argc, char *argv[]) {
 	openlog(argv[0], LOG_CONS | LOG_PID, LOG_LOCAL1);
 	syslog(LOG_NOTICE, "start uid:%d", getuid());
 
-	if (argc > 1 && !strcmp("-h", argv[1])) {
-		fprintf(stderr, "usage: %s [options]\n\n", argv[0]);
+	// parse commandline arguments
+	for (argv0 = *argv; argc > 0; argc--, argv++) {
+		if (!strcmp("-h", argv[0])) {
+			fprintf(stderr, "usage: %s [options]\n\n", argv0);
 
-		fprintf(stderr, "-h\t\thelp\n");
-		fprintf(stderr, "-d\t\tdaemon\n");
-		fprintf(stderr, "-f <file>\tconfig file\n");
-		return 1;
-	} else if (argc > 1 && !strcmp("-d", argv[1])) {
-		if (daemon(1, 0) != 0) {
-			fprintf(stderr, "error: failed to daemonize\n");
-			syslog(LOG_NOTICE, "error: failed to daemonize");
+			fprintf(stderr, "-h         help\n");
+			fprintf(stderr, "-d         daemon\n");
+			fprintf(stderr, "-f <file>  config file\n");
 			return 1;
+		} else if (!strcmp("-d", argv[0])) {
+			if (daemon(1, 0) != 0) {
+				fprintf(stderr, "error: failed to daemonize\n");
+				syslog(LOG_NOTICE, "error: failed to daemonize");
+				return 1;
+			}
+		} else if (!strcmp("-f", argv[0])) {
+			if (argv[1][0] == '-') {
+				fprintf(stderr, "error: -f needs parameter\n");
+				syslog(LOG_NOTICE, "error: -f needs parameter");
+				break;
+			}
+			strncpy(config, argv[1], MAXLEN);
+			printf("config: %s\n", config);
+			syslog(LOG_NOTICE, "config: %s", config);
+			argc--, argv++;
 		}
-	} else if (argc > 2 && !strcmp("-f", argv[1])) {
-		strncpy(config, argv[2], MAXLEN);
-		printf("config: %s\n", config);
-		syslog(LOG_NOTICE, "config: %s", config);
 	}
 
+	// main loop
 	while (1) {
 		t = time(NULL);
 		tm = localtime(&t);
@@ -56,8 +71,11 @@ int main(int argc, char *argv[]) {
 			continue;
 		}
 
+		// get next line from config
 		while (fgets(line, MAXLEN, fp) != NULL) {
+			// skip comments and empty lines
 			if (line[1] != '\0' && line[0] != '\043') {
+				// split line to columns
 				col = strtok(line,"\t");
 				i = 0;
 				while (col != NULL) {
@@ -100,6 +118,7 @@ int main(int argc, char *argv[]) {
 					i++;
 				}
 
+				// skip task if any column is unset
 				if (min == 0 || hour == 0 || mday == 0 || mon == 0 ||
 						wday == 0 || cmd[0] == '\0' || cmd[1] == '\0') {
 					fprintf(stderr, "error: %s line %d\n", config, i);
@@ -108,6 +127,7 @@ int main(int argc, char *argv[]) {
 					continue;
 				}
 
+				// run task if date matches
 				if ((min == -1 || min == tm->tm_min) &&
 						(hour == -1 || hour == tm->tm_hour) &&
 						(mday == -1 || mday == tm->tm_mday) &&
