@@ -5,7 +5,7 @@ Single daemon, config and initscript.
 Logs to stdout and syslog.
 
 usage:
-usage: ./dcron [options]
+usage: dcron [options]
 -h         help
 -d         daemon
 -f <file>  config file
