@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <ctype.h>
+#include <time.h>
 #include <unistd.h>
 #include <syslog.h>
 
@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
 	char config[MAXLEN+1] = "/etc/dcron.conf";
 	char line[MAXLEN+1];
 	char cmd[MAXLEN+1];
-	char *argv0, *col;
+	char *col;
 	int i, l, date[5];
 	time_t t;
 	struct tm *tm;
@@ -21,34 +21,30 @@ int main(int argc, char *argv[]) {
 
 	openlog(argv[0], LOG_CONS | LOG_PID, LOG_LOCAL1);
 
-	for (argv0 = argv[0]; argc > 0; argc--, argv++) {
-		if (!strcmp("-h", argv[0])) {
-			fprintf(stderr, "usage: %s [options]\n", argv0);
+	for (i = 0; i < argc; i++) {
+		if (!strcmp("-h", argv[i])) {
+			fprintf(stderr, "usage: %s [options]\n", argv[0]);
 			fprintf(stderr, "-h        help\n");
 			fprintf(stderr, "-d        daemon\n");
 			fprintf(stderr, "-f <file> config file\n");
 			return 1;
-		} else if (!strcmp("-d", argv[0])) {
+		} else if (!strcmp("-d", argv[i])) {
 			if (daemon(1, 0) != 0) {
 				fprintf(stderr, "error: failed to daemonize\n");
 				syslog(LOG_NOTICE, "error: failed to daemonize");
 				return 1;
 			}
-		} else if (!strcmp("-f", argv[0])) {
-			if (argc < 2 || argv[1][0] == '-') {
+		} else if (!strcmp("-f", argv[i])) {
+			if (argv[i+1] == NULL || argv[i+1][0] == '-') {
 				fprintf(stderr, "error: -f needs parameter\n");
 				syslog(LOG_NOTICE, "error: -f needs parameter");
 				return 1;
 			}
-			strncpy(config, argv[1], MAXLEN);
+			strncpy(config, argv[++i], MAXLEN);
 			printf("config: %s\n", config);
 			syslog(LOG_NOTICE, "config: %s", config);
-			argc--, argv++;
 		}
 	}
-
-	printf("start uid:%d\n", getuid());
-	syslog(LOG_NOTICE, "start uid:%d", getuid());
 
 	while (1) {
 		t = time(NULL);
@@ -72,7 +68,7 @@ int main(int argc, char *argv[]) {
 				else if (ispunct(col[0]))
 					date[i] = -1;
 				else {
-					date[i] = 0;
+					date[i] = -2;
 					fprintf(stderr, "error: %s line %d column %d\n", config, l+1, i+1);
 					syslog(LOG_NOTICE, "error: %s line %d column %d", config, l+1, i+1);
 				}
