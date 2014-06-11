@@ -9,25 +9,24 @@
 
 #define MAXLEN 100
 
-char config[MAXLEN+1] = "/etc/dcron.conf";
-
 int main(int argc, char *argv[]) {
-	FILE *fp;
-	char *argv0, *col;
+	char config[MAXLEN+1] = "/etc/dcron.conf";
 	char line[MAXLEN+1];
 	char cmd[MAXLEN+1];
+	char *argv0, *col;
 	int i, l, date[5];
 	time_t t;
 	struct tm *tm;
+	FILE *fp;
 
 	openlog(argv[0], LOG_CONS | LOG_PID, LOG_LOCAL1);
 
 	for (argv0 = argv[0]; argc > 0; argc--, argv++) {
 		if (!strcmp("-h", argv[0])) {
 			fprintf(stderr, "usage: %s [options]\n", argv0);
-			fprintf(stderr, "-h         help\n");
-			fprintf(stderr, "-d         daemon\n");
-			fprintf(stderr, "-f <file>  config file\n");
+			fprintf(stderr, "-h        help\n");
+			fprintf(stderr, "-d        daemon\n");
+			fprintf(stderr, "-f <file> config file\n");
 			return 1;
 		} else if (!strcmp("-d", argv[0])) {
 			if (daemon(1, 0) != 0) {
@@ -61,7 +60,7 @@ int main(int argc, char *argv[]) {
 			return 1;
 		}
 
-		for (l = 0; fgets(line, MAXLEN, fp) != NULL; l++) {
+		for (l = 0; fgets(line, MAXLEN+1, fp) != NULL; l++) {
 			if (line[1] == '\0' || line[0] == '\043')
 				continue;
 
