@@ -1,3 +1,4 @@
+#define _BSD_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,12 +14,10 @@ char config[MAXLEN+1] = "/etc/dcron.conf";
 
 int main(int argc, char *argv[]) {
 	FILE *fp;
-	char *argv0;
+	char *argv0, *col;
 	char line[MAXLEN+1];
 	char cmd[MAXLEN+1];
-	char *col;
-	int date[5];
-	int i, l;
+	int i, l, date[5];
 	time_t t;
 	struct tm *tm;
 
