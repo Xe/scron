@@ -12,9 +12,6 @@
 // config file location
 char config[MAXLEN+1] = "/etc/dcron.conf";
 
-// implicit declaration of function 'daemon'
-int daemon(int nochdir, int noclose);
-
 int main(int argc, char *argv[]) {
 	FILE *fp;
 	char *argv0;
