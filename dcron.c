@@ -8,7 +8,6 @@
 #include <syslog.h>
 
 #define MAXLEN 100
-#define SLEEP 60
 
 char config[MAXLEN+1] = "/etc/dcron.conf";
 
@@ -23,7 +22,7 @@ int main(int argc, char *argv[]) {
 
 	openlog(argv[0], LOG_CONS | LOG_PID, LOG_LOCAL1);
 
-	for (argv0 = *argv; argc > 0; argc--, argv++) {
+	for (argv0 = argv[0]; argc > 0; argc--, argv++) {
 		if (!strcmp("-h", argv[0])) {
 			fprintf(stderr, "usage: %s [options]\n", argv0);
 			fprintf(stderr, "-h         help\n");
@@ -37,7 +36,7 @@ int main(int argc, char *argv[]) {
 				return 1;
 			}
 		} else if (!strcmp("-f", argv[0])) {
-			if (argv[1][0] == '-' || argv[1][0] == '\0') {
+			if (argc < 2 || argv[1][0] == '-') {
 				fprintf(stderr, "error: -f needs parameter\n");
 				syslog(LOG_NOTICE, "error: -f needs parameter");
 				return 1;
@@ -56,20 +55,17 @@ int main(int argc, char *argv[]) {
 		t = time(NULL);
 		tm = localtime(&t);
 
-		fp = fopen(config, "r");
-		if (fp == NULL) {
+		if ((fp = fopen(config, "r")) == NULL) {
 			fprintf(stderr, "error: cant read %s\n", config);
 			syslog(LOG_NOTICE, "error: cant read %s", config);
-			sleep(SLEEP);
-			continue;
+			return 1;
 		}
 
 		for (l = 0; fgets(line, MAXLEN, fp) != NULL; l++) {
 			if (line[1] == '\0' || line[0] == '\043')
 				continue;
 
-			col = strtok(line,"\t");
-			for (i = 0; col != NULL; col = strtok(NULL, "\t"), i++) {
+			for (col = strtok(line,"\t"), i = 0; col != NULL; col = strtok(NULL, "\t"), i++) {
 				if (i == 5)
 					strncpy(cmd, col, MAXLEN);
 				else if (isdigit(col[0]))
@@ -77,6 +73,7 @@ int main(int argc, char *argv[]) {
 				else if (ispunct(col[0]))
 					date[i] = -1;
 				else {
+					date[i] = 0;
 					fprintf(stderr, "error: %s line %d column %d\n", config, l+1, i+1);
 					syslog(LOG_NOTICE, "error: %s line %d column %d", config, l+1, i+1);
 				}
@@ -96,7 +93,7 @@ int main(int argc, char *argv[]) {
 			}
 		}
 		fclose(fp);
-		sleep(SLEEP);
+		sleep(60);
 	}
 	closelog();
 	return 0;
