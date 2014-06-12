@@ -7,14 +7,12 @@
 #include <unistd.h>
 #include <syslog.h>
 
-#define MAXLEN 100
+#define LEN 100
 
 int main(int argc, char *argv[]) {
-	char config[MAXLEN+1] = "/etc/dcron.conf";
-	char line[MAXLEN+1];
-	char cmd[MAXLEN+1];
-	char *col;
-	int i, l, date[5];
+	char config[LEN+1] = "/etc/dcron.conf";
+	char line[LEN+1], cmd[LEN+1], *col;
+	int i, j, k[5];
 	time_t t;
 	struct tm *tm;
 	FILE *fp;
@@ -40,7 +38,7 @@ int main(int argc, char *argv[]) {
 				syslog(LOG_NOTICE, "error: -f needs parameter");
 				return 1;
 			}
-			strncpy(config, argv[++i], MAXLEN);
+			strncpy(config, argv[++i], LEN);
 			printf("config: %s\n", config);
 			syslog(LOG_NOTICE, "config: %s", config);
 		}
@@ -56,29 +54,30 @@ int main(int argc, char *argv[]) {
 			return 1;
 		}
 
-		for (l = 0; fgets(line, MAXLEN+1, fp) != NULL; l++) {
+		for (i = 0; fgets(line, LEN+1, fp) != NULL; i++) {
 			if (line[1] == '\0' || line[0] == '\043')
 				continue;
 
-			for (col = strtok(line,"\t"), i = 0; col != NULL; col = strtok(NULL, "\t"), i++) {
-				if (i == 5)
-					strncpy(cmd, col, MAXLEN);
+			for (j = 0, col = strtok(line,"\t"); col != NULL; j++, col = strtok(NULL, "\t")) {
+				if (j == 5)
+					strncpy(cmd, col, LEN);
 				else if (isdigit(col[0]))
-					date[i] = strtol(col, NULL, 0);
+					k[j] = strtol(col, NULL, 0);
 				else if (ispunct(col[0]))
-					date[i] = -1;
+					k[j] = -1;
 				else {
-					date[i] = -2;
-					fprintf(stderr, "error: %s line %d column %d\n", config, l+1, i+1);
-					syslog(LOG_NOTICE, "error: %s line %d column %d", config, l+1, i+1);
+					k[j] = -2;
+					fprintf(stderr, "error: %s line %d column %d\n", config, i+1, j+1);
+					syslog(LOG_NOTICE, "error: %s line %d column %d", config, i+1, j+1);
+					break;
 				}
 			}
 
-			if ((date[0] == -1 || date[0] == tm->tm_min) &&
-					(date[1] == -1 || date[1] == tm->tm_hour) &&
-					(date[2] == -1 || date[2] == tm->tm_mday) &&
-					(date[3] == -1 || date[3] == tm->tm_mon) &&
-					(date[4] == -1 || date[4] == tm->tm_wday)) {
+			if ((k[0] == -1 || k[0] == tm->tm_min) &&
+					(k[1] == -1 || k[1] == tm->tm_hour) &&
+					(k[2] == -1 || k[2] == tm->tm_mday) &&
+					(k[3] == -1 || k[3] == tm->tm_mon) &&
+					(k[4] == -1 || k[4] == tm->tm_wday)) {
 				printf("run: %s", cmd);
 				syslog(LOG_NOTICE, "run: %s", cmd);
 				if (system(cmd) != 0) {
