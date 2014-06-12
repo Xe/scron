@@ -1,4 +1,3 @@
-#define _BSD_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,10 +19,19 @@ int main(int argc, char *argv[]) {
 
 	for (i = 1; i < argc; i++) {
 		if (!strcmp("-d", argv[i])) {
-			if (daemon(1, 0) != 0) {
-				fprintf(stderr, "error: failed to daemonize\n");
-				syslog(LOG_NOTICE, "error: failed to daemonize");
-				return 1;
+			switch (fork()) {
+				case -1:
+					fprintf(stderr, "error: failed to daemonize\n");
+					syslog(LOG_NOTICE, "error: failed to daemonize");
+					return 1;
+				case 0:
+					if (setsid() == -1)
+						return 1;
+					fclose(stdout);
+					fclose(stderr);
+					break;
+				default:
+					return 0;
 			}
 		} else if (!strcmp("-f", argv[i])) {
 			if (argv[i+1] == NULL || argv[i+1][0] == '-') {
@@ -43,7 +51,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	for (;; sleep(60)) {
+	for (t = time(NULL), sleep(60 - t % 60); 1; t = time(NULL), sleep(60 - t % 60)) {
 		t = time(NULL);
 		tm = localtime(&t);
 
@@ -54,7 +62,7 @@ int main(int argc, char *argv[]) {
 		}
 
 		for (i = 0; fgets(line, LEN+1, fp) != NULL; i++) {
-			if (line[1] == '\0' || line[0] == '\043')
+			if (line[0] == '#' || line[1] == '\0')
 				continue;
 
 			for (j = 0, col = strtok(line,"\t"); col != NULL; j++, col = strtok(NULL, "\t")) {
@@ -67,11 +75,12 @@ int main(int argc, char *argv[]) {
 				} else if (j == 5) {
 					printf("run: %s", col);
 					syslog(LOG_NOTICE, "run: %s", col);
-					if (system(col) != 0) {
+					if (fork() == 0) {
+						execl("/bin/sh", "/bin/sh", "-c", col, (char *)NULL);
 						fprintf(stderr, "error: job failed\n");
 						syslog(LOG_NOTICE, "error: job failed");
 					}
-				} else if (!isdigit(col[0])) {
+				} else if (!isdigit(col[0]) || j > 5) {
 					fprintf(stderr, "error: %s line %d column %d\n", config, i+1, j+1);
 					syslog(LOG_NOTICE, "error: %s line %d column %d", config, i+1, j+1);
 				}

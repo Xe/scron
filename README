@@ -3,8 +3,6 @@ dcron - simple cron daemon
 features:
 Single daemon, config and initscript.
 Logs to stdout and syslog.
-Waits for job to finish and checks return value.
-You can disable this by appending & to command.
 
 usage:
 usage: dcron [options]
@@ -13,6 +11,6 @@ usage: dcron [options]
 -f <file> config file
 
 config:
-# min,hour,mday,mon,wday,command
-10	6	*	*	*	exec ionice -n 2 updatedb
-20	6	*	*	*	exec nice -n 10 mandb --quiet
+# tm_min, tm_hour, tm_mday, tm_mon, tm_wday, command
+10	6	*	*	*	exec updatedb
+20	6	*	*	*	exec mandb --quiet
