@@ -3,6 +3,8 @@ dcron - simple cron daemon
 features:
 Single daemon, config and initscript.
 Logs to stdout and syslog.
+Waits for job to finish and checks return value.
+You can disable this by appending & to command.
 
 usage:
 usage: dcron [options]
