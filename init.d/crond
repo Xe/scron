@@ -1,5 +1,5 @@
 #!/sbin/runscript
 
-command=cron
+command=crond
 command_args=-d
-name="cron"
+name="cron daemon"

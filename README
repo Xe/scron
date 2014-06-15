@@ -12,6 +12,7 @@ features
 Schedule tasks.
 Single daemon, config and initscript.
 Log to stdout and syslog.
+Good error handling.
 
 usage
 -----
