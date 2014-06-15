@@ -16,7 +16,7 @@ Good error handling.
 
 usage
 -----
-usage: cron [options]
+usage: crond [options]
 -h        help
 -d        daemon
 -f <file> config file
