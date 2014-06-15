@@ -1,18 +1,18 @@
 CFLAGS=-std=c99 -Wall -Wpedantic -Wextra
 
-all: dcron
+all: cron
 
-install: dcron
+install: cron
 	mkdir -p ${DESTDIR}/sbin
 	mkdir -p ${DESTDIR}/etc/init.d
-	install -m 755 dcron ${DESTDIR}/sbin/
-	install -m 755 init.d/dcron ${DESTDIR}/etc/init.d/
-	install -m 644 dcron.conf ${DESTDIR}/etc/
+	install -m 755 cron ${DESTDIR}/sbin/
+	install -m 755 init.d/cron ${DESTDIR}/etc/init.d/
+	install -m 644 crontab ${DESTDIR}/etc/
 
 uninstall:
-	rm -f ${DESTDIR}/sbin/dcron
-	rm ${DESTDIR}/etc/init.d/dcron
-	rm ${DESTDIR}/etc/dcron.conf
+	rm -f ${DESTDIR}/sbin/cron
+	rm ${DESTDIR}/etc/init.d/cron
+	rm ${DESTDIR}/etc/crontab
 
 clean:
-	rm dcron
+	rm cron

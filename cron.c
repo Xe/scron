@@ -9,7 +9,7 @@
 #define LEN 80
 
 int main(int argc, char *argv[]) {
-	char *ep, *col, line[LEN+1], config[LEN+1] = "/etc/dcron.conf";
+	char *ep, *col, line[LEN+1], config[LEN+1] = "/etc/crontab";
 	int i, j;
 	time_t t;
 	struct tm *tm;

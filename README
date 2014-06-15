@@ -1,16 +1,26 @@
-dcron - simple cron daemon
+scron - simple cron daemon
+==========================
 
-features:
+about
+-----
+author: Ari Malinen
+license: BSD 2-clause
+git: https://github.com/defer-/scron
+
+features
+--------
+Schedule tasks.
 Single daemon, config and initscript.
-Logs to stdout and syslog.
+Log to stdout and syslog.
 
-usage:
-usage: dcron [options]
+usage
+-----
+usage: cron [options]
 -h        help
 -d        daemon
 -f <file> config file
 
-config:
+config
+------
 # tm_min, tm_hour, tm_mday, tm_mon, tm_wday, command
 0	5	*	*	*	updatedb
-9	5	*	*	*	mandb --quiet

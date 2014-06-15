@@ -1,5 +1,5 @@
 #!/sbin/runscript
 
-command=dcron
+command=cron
 command_args=-d
-name="dcron"
+name="cron"
