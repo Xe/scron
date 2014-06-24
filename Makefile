@@ -1,4 +1,4 @@
-CFLAGS=-std=c99 -Wall -Wpedantic -Wextra
+CFLAGS=-std=c99 -Wall -pedantic -Wextra
 
 all: crond
 
