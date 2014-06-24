@@ -1,18 +1,11 @@
 scron - simple cron daemon
 ==========================
 
-about
------
-author: Ari Malinen
-license: BSD 2-clause
-git: https://github.com/defer-/scron
-
 features
 --------
 Schedule tasks.
 Single daemon, config and initscript.
 Log to stdout and syslog.
-Good error handling.
 
 usage
 -----

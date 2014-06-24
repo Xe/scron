@@ -4,15 +4,18 @@
 #include <ctype.h>
 #include <time.h>
 #include <unistd.h>
+#include <sys/wait.h>
+#include <sys/types.h>
 #include <syslog.h>
 
 #define LEN 100
 
 int main(int argc, char *argv[]) {
 	char *ep, *col, line[LEN+1], config[LEN+1] = "/etc/crontab";
-	int i, j;
+	int status, i, j;
 	time_t t;
 	struct tm *tm;
+	pid_t pid;
 	FILE *fp;
 
 	openlog(argv[0], LOG_CONS | LOG_PID, LOG_LOCAL1);
@@ -78,7 +81,7 @@ int main(int argc, char *argv[]) {
 				} else if (j == 5) {
 					printf("run: %s", col);
 					syslog(LOG_NOTICE, "run: %s", col);
-					switch (fork()) {
+					switch (pid = fork()) {
 						case -1:
 							fprintf(stderr, "error: job failed: %s", col);
 							syslog(LOG_NOTICE, "error: job failed: %s", col);
@@ -100,6 +103,10 @@ int main(int argc, char *argv[]) {
 		}
 
 		fclose(fp);
+
+		while ((pid = wait(&status)) > 0) {
+			syslog(LOG_NOTICE, "job complete pid: %d return: %d", (int) pid, status);
+		}
 	}
 
 	closelog();
