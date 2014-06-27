@@ -6,6 +6,7 @@ features
 Schedule tasks.
 Single daemon, config and initscript.
 Log to stdout and syslog.
+No mail support.
 
 usage
 -----
@@ -14,7 +15,8 @@ usage: crond [options]
 -d        daemon
 -f <file> config file
 
-config
-------
+example config
+--------------
 # tm_min, tm_hour, tm_mday, tm_mon, tm_wday, command
-0	5	*	*	*	updatedb
+0	5	*	*	*	updatedb	# 06:00 every day
+29	4	*	*	1-5	emerge --sync	# 5:30 every weekday
