@@ -3,10 +3,12 @@ scron - simple cron daemon
 
 features
 --------
-Schedule tasks.
-Single daemon, config and initscript.
-Log to stdout and syslog.
-No mail support.
+schedule tasks
+single daemon, config and initscript
+log job output: command &>> /var/log/cron.log
+run as different user: su -c 'command' user
+log to stdout and syslog
+no mail support
 
 usage
 -----
@@ -18,5 +20,5 @@ usage: crond [options]
 example config
 --------------
 # tm_min, tm_hour, tm_mday, tm_mon, tm_wday, command
-0	5	*	*	*	updatedb	# 06:00 every day
-29	4	*	*	1-5	emerge --sync	# 5:30 every weekday
+0	6	*	*	*	updatedb	# 06:00 every day
+30	5	*	*	1-5	emerge --sync	# 5:30 every weekday
