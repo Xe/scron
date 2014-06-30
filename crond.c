@@ -46,7 +46,7 @@ void arg(int argc, char *argv[]) {
 }
 
 int parsecolumn(char *col, int y, int x) {
-	int entry, entry2;
+	int value, value2;
 	char *endptr, *endptr2;
 	time_t t;
 	struct tm *tm;
@@ -57,11 +57,11 @@ int parsecolumn(char *col, int y, int x) {
 	if (x >= 0 && x <= 4) {
 		endptr = "";
 		endptr2 = "";
-		entry = strtol(col, &endptr, 0);
-		entry2 = -1;
+		value = strtol(col, &endptr, 0);
+		value2 = -1;
 		if (*endptr == '-') {
 			endptr++;
-			entry2 = strtol(endptr, &endptr2, 0);
+			value2 = strtol(endptr, &endptr2, 0);
 			endptr = "";
 		}
 
@@ -70,19 +70,19 @@ int parsecolumn(char *col, int y, int x) {
 		} else if (*endptr != '\0' || *endptr2 != '\0') {
 			fprintf(stderr, "error: %s line %d column %d\n", config, y+1, x+1);
 			syslog(LOG_WARNING, "error: %s line %d column %d", config, y+1, x+1);
-		} else if (entry2 == -1) {
-			if ((x == 0 && entry == tm->tm_min) ||
-					(x == 1 && entry == tm->tm_hour) ||
-					(x == 2 && entry == tm->tm_mday) ||
-					(x == 3 && entry == tm->tm_mon) ||
-					(x == 4 && entry == tm->tm_wday))
+		} else if (value2 == -1) {
+			if ((x == 0 && value == tm->tm_min) ||
+					(x == 1 && value == tm->tm_hour) ||
+					(x == 2 && value == tm->tm_mday) ||
+					(x == 3 && value == tm->tm_mon) ||
+					(x == 4 && value == tm->tm_wday))
 				return 0;
 		} else {
-			if ((x == 0 && entry <= tm->tm_min && entry2 >= tm->tm_min) ||
-					(x == 1 && entry <= tm->tm_hour && entry2 >= tm->tm_hour) ||
-					(x == 2 && entry <= tm->tm_mday && entry2 >= tm->tm_mday) ||
-					(x == 3 && entry <= tm->tm_mon && entry2 >= tm->tm_mon) ||
-					(x == 4 && entry <= tm->tm_wday && entry2 >= tm->tm_wday))
+			if ((x == 0 && value <= tm->tm_min && value2 >= tm->tm_min) ||
+					(x == 1 && value <= tm->tm_hour && value2 >= tm->tm_hour) ||
+					(x == 2 && value <= tm->tm_mday && value2 >= tm->tm_mday) ||
+					(x == 3 && value <= tm->tm_mon && value2 >= tm->tm_mon) ||
+					(x == 4 && value <= tm->tm_wday && value2 >= tm->tm_wday))
 				return 0;
 		}
 	}
