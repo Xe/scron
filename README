@@ -1,5 +1,9 @@
-scron - simple cron daemon
-==========================
+scron
+=====
+
+about
+-----
+simple cron daemon
 
 features
 --------
@@ -19,10 +23,13 @@ usage: crond [options]
 
 config
 ------
+syntax:
 value: * (wildcard), 30 (number) or 1-5 (range)
 separator: \t (tab)
 
 example:
 # tm_min tm_hour tm_mday tm_mon tm_wday command
-0	6	*	*	*	updatedb	# 06:00 every day
-30	5	*	*	1-5	emerge --sync	# 5:30 every weekday
+# 6:00 every day
+0	6	*	*	*	updatedb
+# 5:30 every weekday
+30	5	*	*	1-5	rsync -r --quiet /var/www backup@192.168.0.8:~
