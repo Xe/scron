@@ -120,7 +120,7 @@ runjob(char *cmd)
 }
 
 static void
-checkreturn(void)
+waitjob(void)
 {
 	int status;
 	time_t t;
@@ -175,7 +175,7 @@ main(int argc, char *argv[])
 		}
 
 		rewind(fp);
-		checkreturn();
+		waitjob();
 	}
 
 	fclose(fp);
