@@ -170,10 +170,9 @@ main(int argc, char *argv[])
 			for (x = 0, col = strtok(line, "\t"); col; x++, col = strtok(NULL, "\t")) {
 				if (!parsecolumn(col, y, x))
 					continue;
-				else if (x == 5)
+				if (x == 5)
 					runjob(col);
-				else
-					break;
+				break;
 			}
 		}
 
