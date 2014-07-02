@@ -12,40 +12,11 @@
 #include <time.h>
 #include <unistd.h>
 
-static char config[PATH_MAX] = "/etc/crontab";
+#include "arg.h"
 
-static void
-arg(int argc, char *argv[])
-{
-	int i;
-	pid_t pid;
-
-	for (i = 1; i < argc; i++) {
-		if (strcmp("-d", argv[i]) == 0) {
-			pid = fork();
-			if (pid < 0)
-				fprintf(stderr, "error: failed to fork daemon\n");
-			else if (pid == 0)
-				daemon(0, 0);
-			else
-				exit(EXIT_SUCCESS);
-		} else if (strcmp("-f", argv[i]) == 0) {
-			if (argv[i + 1] == NULL || argv[i + 1][0] == '-') {
-				fprintf(stderr, "error: -f needs parameter\n");
-				syslog(LOG_WARNING, "error: -f needs parameter");
-				exit(EXIT_FAILURE);
-			}
-			strncpy(config, argv[++i], sizeof(config));
-			config[sizeof(config) - 1] = '\0';
-		} else {
-			fprintf(stderr, "usage: %s [options]\n", argv[0]);
-			fprintf(stderr, "-h        help\n");
-			fprintf(stderr, "-d        daemon\n");
-			fprintf(stderr, "-f <file> config file\n");
-			exit(EXIT_FAILURE);
-		}
-	}
-}
+char *argv0;
+static char *config = "/etc/crontab";
+static int dflag;
 
 static int
 validfield(int x, int value)
@@ -72,13 +43,10 @@ parsecolumn(char *col, int y, int x)
 	struct tm *tm;
 
 	if (x < 0 || x > 4)
-		return 1;
+		return -1;
 
 	if (strcmp("*", col) == 0)
 		return 0;
-
-	t = time(NULL);
-	tm = localtime(&t);
 
 	/* parse element */
 	endptr = "";
@@ -94,7 +62,7 @@ parsecolumn(char *col, int y, int x)
 	if (*endptr != '\0' || *endptr2 != '\0') {
 		fprintf(stderr, "error: %s line %d column %d\n", config, y+1, x+1);
 		syslog(LOG_WARNING, "error: %s line %d column %d", config, y+1, x+1);
-		return 1;
+		return -1;
 	}
 
 	/* check if element is valid */
@@ -105,6 +73,9 @@ parsecolumn(char *col, int y, int x)
 		syslog(LOG_WARNING, "error: %s line %d column %d",
 		       config, y+1, x+1);
 	}
+
+	t = time(NULL);
+	tm = localtime(&t);
 
 	/* check if we have a match */
 	if (value2 == -1) {
@@ -123,7 +94,7 @@ parsecolumn(char *col, int y, int x)
 			return 0;
 	}
 
-	return 1;
+	return -1;
 }
 
 static void
@@ -169,25 +140,48 @@ waitjob(void)
 	}
 }
 
+static void
+usage(void)
+{
+	fprintf(stderr, "usage: %s [-d] [-f file] [options]\n", argv0);
+	fprintf(stderr, "  -d	daemonize\n");
+	fprintf(stderr, "  -f	config file\n");
+	exit(EXIT_FAILURE);
+}
+
 int
 main(int argc, char *argv[])
 {
-	int y, x;
 	char line[PATH_MAX];
 	char *col;
+	int y, x;
 	time_t t;
 	FILE *fp;
 
-	openlog(argv[0], LOG_CONS | LOG_PID, LOG_DAEMON);
+	ARGBEGIN {
+	case 'd':
+		dflag = 1;
+		break;
+	case 'f':
+		config = EARGF(usage());
+		break;
+	default:
+		usage();
+	} ARGEND;
 
-	arg(argc, argv);
+	if (argc > 0)
+		usage();
+
+	openlog(argv[0], LOG_CONS | LOG_PID, LOG_DAEMON);
 
 	if ((fp = fopen(config, "r")) == NULL) {
 		fprintf(stderr, "error: cant read %s\n", config);
-		syslog(LOG_WARNING, "error: cant read %s", config);
 		closelog();
 		return EXIT_FAILURE;
 	}
+
+	if (dflag == 1)
+		daemon(0, 0);
 
 	while (1) {
 		t = time(NULL);
@@ -200,7 +194,7 @@ main(int argc, char *argv[])
 				line[strlen(line) - 1] = '\0';
 
 			for (x = 0, col = strtok(line, "\t"); col; x++, col = strtok(NULL, "\t")) {
-				if (!parsecolumn(col, y, x))
+				if (parsecolumn(col, y, x) == 0)
 					continue;
 				if (x == 5)
 					runjob(col);
@@ -214,5 +208,6 @@ main(int argc, char *argv[])
 
 	fclose(fp);
 	closelog();
+
 	return EXIT_SUCCESS;
 }
