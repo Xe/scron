@@ -178,11 +178,6 @@ main(int argc, char *argv[])
 	if (argc > 0)
 		usage();
 
-	if ((fp = fopen(config, "r")) == NULL) {
-		fprintf(stderr, "error: cant read %s\n", config);
-		return EXIT_FAILURE;
-	}
-
 	if (dflag == 1) {
 		openlog(argv[0], LOG_CONS | LOG_PID, LOG_DAEMON);
 		daemon(0, 0);
@@ -191,6 +186,13 @@ main(int argc, char *argv[])
 	while (1) {
 		t = time(NULL);
 		sleep(60 - t % 60);
+
+		if ((fp = fopen(config, "r")) == NULL) {
+			if (dflag == 1)
+				syslog(LOG_WARNING, "error: cant read %s", config);
+			fprintf(stderr, "error: cant read %s\n", config);
+			continue;
+		}
 
 		for (y = 0; fgets(line, sizeof(line), fp); y++) {
 			if (line[0] == '#' || line[0] == '\n' || line[0] == '\0')
@@ -207,11 +209,10 @@ main(int argc, char *argv[])
 			}
 		}
 
-		rewind(fp);
+		fclose(fp);
 		waitjob();
 	}
 
-	fclose(fp);
 	if (dflag == 1)
 		closelog();
 
