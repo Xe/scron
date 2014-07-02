@@ -1,4 +1,5 @@
-CFLAGS+=-std=c99 -Wall -pedantic
+CFLAGS += -Os -std=c99 -Wall -Wextra -pedantic
+LDFLAGS += -s -static
 
 all: crond
 
