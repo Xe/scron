@@ -63,8 +63,10 @@ parsecolumn(char *col, int y, int x)
 
 	if (*endptr != '\0' || *endptr2 != '\0') {
 		if (dflag == 1)
-			syslog(LOG_WARNING, "error: %s line %d column %d", config, y+1, x+1);
-		fprintf(stderr, "error: %s line %d column %d\n", config, y+1, x+1);
+			syslog(LOG_WARNING, "error: %s line %d column %d",
+			       config, y + 1, x + 1);
+		fprintf(stderr, "error: %s line %d column %d\n",
+			config, y + 1, x + 1);
 		return -1;
 	}
 
@@ -73,9 +75,9 @@ parsecolumn(char *col, int y, int x)
 	    (value2 != -1 && validfield(x, value2) == 0)) {
 		if (dflag == 1)
 			syslog(LOG_WARNING, "error: %s line %d column %d",
-			       config, y+1, x+1);
+			       config, y + 1, x + 1);
 		fprintf(stderr, "error: %s line %d column %d\n",
-			config, y+1, x+1);
+			config, y + 1, x + 1);
 	}
 
 	t = time(NULL);
