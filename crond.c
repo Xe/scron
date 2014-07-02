@@ -114,7 +114,7 @@ runjob(char *cmd)
 		printf("run: %s pid: %d time: %s", cmd, getpid(), ctime(&t));
 		fflush(stdout);
 		syslog(LOG_INFO, "run: %s pid: %d", cmd, getpid());
-		execl("/bin/sh", "/bin/sh", "-c", cmd, (char *) NULL);
+		execl("/bin/sh", "/bin/sh", "-c", cmd, (char *)NULL);
 		fprintf(stderr, "error: job failed: %s time: %s\n", cmd, ctime(&t));
 		syslog(LOG_WARNING, "error: job failed: %s", cmd);
 		_exit(EXIT_FAILURE);
@@ -131,9 +131,9 @@ waitjob(void)
 	t = time(NULL);
 
 	while ((pid = waitpid(-1, &status, WNOHANG | WUNTRACED)) > 0) {
-		printf("complete: pid %d, return: %d time: %s", (int) pid, status, ctime(&t));
+		printf("complete: pid %d, return: %d time: %s", pid, status, ctime(&t));
 		fflush(stdout);
-		syslog(LOG_INFO, "complete: pid: %d return: %d", (int) pid, status);
+		syslog(LOG_INFO, "complete: pid: %d return: %d", pid, status);
 	}
 }
 
