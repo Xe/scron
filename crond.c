@@ -117,7 +117,7 @@ runjob(char *cmd)
 		execl("/bin/sh", "/bin/sh", "-c", cmd, (char *) NULL);
 		fprintf(stderr, "error: job failed: %s time: %s\n", cmd, ctime(&t));
 		syslog(LOG_WARNING, "error: job failed: %s", cmd);
-		exit(EXIT_FAILURE);
+		_exit(EXIT_FAILURE);
 	}
 }
 
