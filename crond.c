@@ -21,26 +21,22 @@ arg(int argc, char *argv[])
 	pid_t pid;
 
 	for (i = 1; i < argc; i++) {
-		if (!strcmp("-d", argv[i])) {
+		if (strcmp("-d", argv[i]) == 0) {
 			pid = fork();
-			if (pid < 0) {
+			if (pid < 0)
 				fprintf(stderr, "error: failed to fork daemon\n");
-				syslog(LOG_WARNING, "error: failed to fork daemon");
-			} else if (pid == 0) {
-				setsid();
-				fclose(stdin);
-				fclose(stdout);
-				fclose(stderr);
-			} else {
+			else if (pid == 0)
+				daemon(0, 0);
+			else
 				exit(EXIT_SUCCESS);
-			}
-		} else if (!strcmp("-f", argv[i])) {
-			if (argv[i+1] == NULL || argv[i+1][0] == '-') {
+		} else if (strcmp("-f", argv[i]) == 0) {
+			if (argv[i + 1] == NULL || argv[i + 1][0] == '-') {
 				fprintf(stderr, "error: -f needs parameter\n");
 				syslog(LOG_WARNING, "error: -f needs parameter");
 				exit(EXIT_FAILURE);
 			}
-			strncpy(config, argv[++i], PATH_MAX-1);
+			strncpy(config, argv[++i], sizeof(config));
+			config[sizeof(config) - 1] = '\0';
 		} else {
 			fprintf(stderr, "usage: %s [options]\n", argv[0]);
 			fprintf(stderr, "-h        help\n");
