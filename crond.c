@@ -112,6 +112,7 @@ runjob(char *cmd)
 		syslog(LOG_WARNING, "error: failed to fork job: %s", cmd);
 	} else if (pid == 0) {
 		printf("run: %s pid: %d time: %s", cmd, getpid(), ctime(&t));
+		fflush(stdout);
 		syslog(LOG_INFO, "run: %s pid: %d", cmd, getpid());
 		execl("/bin/sh", "/bin/sh", "-c", cmd, (char *) NULL);
 		fprintf(stderr, "error: job failed: %s time: %s\n", cmd, ctime(&t));
@@ -131,6 +132,7 @@ waitjob(void)
 
 	while ((pid = waitpid(-1, &status, WNOHANG | WUNTRACED)) > 0) {
 		printf("complete: pid %d, return: %d time: %s", (int) pid, status, ctime(&t));
+		fflush(stdout);
 		syslog(LOG_INFO, "complete: pid: %d return: %d", (int) pid, status);
 	}
 }
