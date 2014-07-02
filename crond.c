@@ -48,6 +48,22 @@ arg(int argc, char *argv[])
 }
 
 static int
+validfield(int x, int value)
+{
+	if (x == 0 && value >= 0 && value <= 59)
+		return 1;
+	if (x == 1 && value >= 0 && value <= 23)
+		return 1;
+	if (x == 2 && value >= 1 && value <= 31)
+		return 1;
+	if (x == 3 && value >= 1 && value <= 12)
+		return 1;
+	if (x == 4 && value >= 0 && value <= 6)
+		return 1;
+	return 0;
+}
+
+static int
 parsecolumn(char *col, int y, int x)
 {
 	int value, value2;
@@ -55,40 +71,56 @@ parsecolumn(char *col, int y, int x)
 	time_t t;
 	struct tm *tm;
 
+	if (x < 0 || x > 4)
+		return 1;
+
+	if (strcmp("*", col) == 0)
+		return 0;
+
 	t = time(NULL);
 	tm = localtime(&t);
 
-	if (x >= 0 && x <= 4) {
+	/* parse element */
+	endptr = "";
+	endptr2 = "";
+	value = strtol(col, &endptr, 0);
+	value2 = -1;
+	if (*endptr == '-') {
+		endptr++;
+		value2 = strtol(endptr, &endptr2, 0);
 		endptr = "";
-		endptr2 = "";
-		value = strtol(col, &endptr, 0);
-		value2 = -1;
-		if (*endptr == '-') {
-			endptr++;
-			value2 = strtol(endptr, &endptr2, 0);
-			endptr = "";
-		}
+	}
 
-		if (!strcmp("*", col)) {
+	if (*endptr != '\0' || *endptr2 != '\0') {
+		fprintf(stderr, "error: %s line %d column %d\n", config, y+1, x+1);
+		syslog(LOG_WARNING, "error: %s line %d column %d", config, y+1, x+1);
+		return 1;
+	}
+
+	/* check if element is valid */
+	if ((value != -1 && validfield(x, value) == 0) ||
+	    (value2 != -1 && validfield(x, value2) == 0)) {
+		fprintf(stderr, "error: %s line %d column %d\n",
+			config, y+1, x+1);
+		syslog(LOG_WARNING, "error: %s line %d column %d",
+		       config, y+1, x+1);
+	}
+
+	/* check if we have a match */
+	if (value2 == -1) {
+		if ((x == 0 && value == tm->tm_min) ||
+		    (x == 1 && value == tm->tm_hour) ||
+		    (x == 2 && value == tm->tm_mday) ||
+		    (x == 3 && value == tm->tm_mon) ||
+		    (x == 4 && value == tm->tm_wday))
 			return 0;
-		} else if (*endptr != '\0' || *endptr2 != '\0') {
-			fprintf(stderr, "error: %s line %d column %d\n", config, y+1, x+1);
-			syslog(LOG_WARNING, "error: %s line %d column %d", config, y+1, x+1);
-		} else if (value2 == -1) {
-			if ((x == 0 && value == tm->tm_min) ||
-			    (x == 1 && value == tm->tm_hour) ||
-			    (x == 2 && value == tm->tm_mday) ||
-			    (x == 3 && value == tm->tm_mon) ||
-			    (x == 4 && value == tm->tm_wday))
-				return 0;
-		} else {
-			if ((x == 0 && value <= tm->tm_min && value2 >= tm->tm_min) ||
-			    (x == 1 && value <= tm->tm_hour && value2 >= tm->tm_hour) ||
-			    (x == 2 && value <= tm->tm_mday && value2 >= tm->tm_mday) ||
-			    (x == 3 && value <= tm->tm_mon && value2 >= tm->tm_mon) ||
-			    (x == 4 && value <= tm->tm_wday && value2 >= tm->tm_wday))
-				return 0;
-		}
+	} else {
+		if ((x == 0 && value <= tm->tm_min && value2 >= tm->tm_min) ||
+		    (x == 1 && value <= tm->tm_hour && value2 >= tm->tm_hour) ||
+		    (x == 2 && value <= tm->tm_mday && value2 >= tm->tm_mday) ||
+		    (x == 3 && value <= tm->tm_mon && value2 >= tm->tm_mon) ||
+		    (x == 4 && value <= tm->tm_wday && value2 >= tm->tm_wday))
+			return 0;
 	}
 
 	return 1;
