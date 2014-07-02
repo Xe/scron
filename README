@@ -14,13 +14,6 @@ run as different user: su -c 'command' user
 log to stdout and syslog
 no mail support
 
-usage
------
-usage: crond [options]
--h        help
--d        daemon
--f <file> config file
-
 config
 ------
 syntax:
