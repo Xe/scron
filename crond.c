@@ -14,6 +14,8 @@
 
 #include "arg.h"
 
+#define VERSION "0.1"
+
 char *argv0;
 static char *config = "/etc/crontab";
 static int dflag;
@@ -149,6 +151,7 @@ waitjob(void)
 static void
 usage(void)
 {
+	fprintf(stderr, VERSION " (c) 2014\n");
 	fprintf(stderr, "usage: %s [-d] [-f file] [options]\n", argv0);
 	fprintf(stderr, "  -d	daemonize\n");
 	fprintf(stderr, "  -f	config file\n");
