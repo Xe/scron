@@ -127,9 +127,13 @@ waitjob(void)
 	t = time(NULL);
 
 	while ((pid = waitpid(-1, &status, WNOHANG | WUNTRACED)) > 0) {
-		printf("complete: pid %d, return: %d time: %s", pid, status, ctime(&t));
-		fflush(stdout);
-		syslog(LOG_INFO, "complete: pid: %d return: %d", pid, status);
+		if (WIFEXITED(status) == 1) {
+			printf("complete: pid %d, return: %d time: %s",
+			       pid, WEXITSTATUS(status), ctime(&t));
+			fflush(stdout);
+			syslog(LOG_INFO, "complete: pid: %d return: %d",
+			       pid, WEXITSTATUS(status));
+		}
 	}
 }
 
