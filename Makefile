@@ -15,4 +15,4 @@ uninstall:
 	rm ${DESTDIR}/etc/crontab
 
 clean:
-	rm crond
+	rm -f crond
