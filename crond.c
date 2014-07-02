@@ -60,18 +60,20 @@ parsecolumn(char *col, int y, int x)
 	}
 
 	if (*endptr != '\0' || *endptr2 != '\0') {
+		if (dflag == 1)
+			syslog(LOG_WARNING, "error: %s line %d column %d", config, y+1, x+1);
 		fprintf(stderr, "error: %s line %d column %d\n", config, y+1, x+1);
-		syslog(LOG_WARNING, "error: %s line %d column %d", config, y+1, x+1);
 		return -1;
 	}
 
 	/* check if element is valid */
 	if ((value != -1 && validfield(x, value) == 0) ||
 	    (value2 != -1 && validfield(x, value2) == 0)) {
+		if (dflag == 1)
+			syslog(LOG_WARNING, "error: %s line %d column %d",
+			       config, y+1, x+1);
 		fprintf(stderr, "error: %s line %d column %d\n",
 			config, y+1, x+1);
-		syslog(LOG_WARNING, "error: %s line %d column %d",
-		       config, y+1, x+1);
 	}
 
 	t = time(NULL);
@@ -107,15 +109,18 @@ runjob(char *cmd)
 
 	pid = fork();
 	if (pid < 0) {
+		if (dflag == 1)
+			syslog(LOG_WARNING, "error: failed to fork job: %s", cmd);
 		fprintf(stderr, "error: failed to fork job: %s time: %s", cmd, ctime(&t));
-		syslog(LOG_WARNING, "error: failed to fork job: %s", cmd);
 	} else if (pid == 0) {
 		printf("run: %s pid: %d time: %s", cmd, getpid(), ctime(&t));
 		fflush(stdout);
-		syslog(LOG_INFO, "run: %s pid: %d", cmd, getpid());
+		if (dflag == 1)
+			syslog(LOG_INFO, "run: %s pid: %d", cmd, getpid());
 		execl("/bin/sh", "/bin/sh", "-c", cmd, (char *)NULL);
 		fprintf(stderr, "error: job failed: %s time: %s\n", cmd, ctime(&t));
-		syslog(LOG_WARNING, "error: job failed: %s", cmd);
+		if (dflag == 1)
+			syslog(LOG_WARNING, "error: job failed: %s", cmd);
 		_exit(EXIT_FAILURE);
 	}
 }
@@ -134,8 +139,9 @@ waitjob(void)
 			printf("complete: pid %d, return: %d time: %s",
 			       pid, WEXITSTATUS(status), ctime(&t));
 			fflush(stdout);
-			syslog(LOG_INFO, "complete: pid: %d return: %d",
-			       pid, WEXITSTATUS(status));
+			if (dflag == 1)
+				syslog(LOG_INFO, "complete: pid: %d return: %d",
+				       pid, WEXITSTATUS(status));
 		}
 	}
 }
@@ -172,16 +178,15 @@ main(int argc, char *argv[])
 	if (argc > 0)
 		usage();
 
-	openlog(argv[0], LOG_CONS | LOG_PID, LOG_DAEMON);
-
 	if ((fp = fopen(config, "r")) == NULL) {
 		fprintf(stderr, "error: cant read %s\n", config);
-		closelog();
 		return EXIT_FAILURE;
 	}
 
-	if (dflag == 1)
+	if (dflag == 1) {
+		openlog(argv[0], LOG_CONS | LOG_PID, LOG_DAEMON);
 		daemon(0, 0);
+	}
 
 	while (1) {
 		t = time(NULL);
@@ -207,7 +212,8 @@ main(int argc, char *argv[])
 	}
 
 	fclose(fp);
-	closelog();
+	if (dflag == 1)
+		closelog();
 
 	return EXIT_SUCCESS;
 }
