@@ -8,7 +8,7 @@ simple cron daemon
 features
 --------
 schedule tasks
-single daemon, config and initscript
+single daemon and config
 log job output: command &>> /var/log/cron.log
 run as different user: su -c 'command' user
 log to stdout and syslog
