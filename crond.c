@@ -180,20 +180,29 @@ parsefield(const char *field, int low, int high, struct range *r)
 		r->high = -1;
 		return 0;
 	}
+
 	max = -1;
 	min = strtol(field, &e1, 10);
-	if (e1[0] == '-') {
+
+	switch (e1[0]) {
+	case '-':
 		e1++;
 		max = strtol(e1, &e2, 10);
 		if (e2[0] != '\0')
 			return -1;
-	} else if (e1[0] != '\0')
+		break;
+	case '\0':
+		break;
+	default:
 		return -1;
+	}
+
 	if (min < low || min > high)
 		return -1;
 	if (max != -1)
 		if (max < low || max > high)
 			return -1;
+
 	r->low = min;
 	r->high = max;
 	return 0;
