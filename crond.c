@@ -152,6 +152,7 @@ matchentry(struct ctabentry *cte, struct tm *tm)
 	size_t i;
 
 	for (i = 0; i < LEN(matchtbl); i++) {
+		/* this is the match-any case, '*' */
 		if (matchtbl[i].r->low == -1 && matchtbl[i].r->high == -1)
 			continue;
 		if (matchtbl[i].r->high == -1) {
