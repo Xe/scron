@@ -139,8 +139,17 @@ waitjob(void)
 	t = time(NULL);
 
 	while ((pid = waitpid(-1, &status, WNOHANG | WUNTRACED)) > 0) {
+		if (WIFSIGNALED(status) == 1) {
+			printf("complete: pid: %d terminated by signal: %d time: %s",
+			       pid, WTERMSIG(status), ctime(&t));
+			fflush(stdout);
+			if (dflag == 1)
+				syslog(LOG_INFO, "complete: pid: %d terminated by signal: %d",
+				       pid, WTERMSIG(status));
+			return;
+		}
 		if (WIFEXITED(status) == 1) {
-			printf("complete: pid %d, return: %d time: %s",
+			printf("complete: pid: %d, return: %d time: %s",
 			       pid, WEXITSTATUS(status), ctime(&t));
 			fflush(stdout);
 			if (dflag == 1)
