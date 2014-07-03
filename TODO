@@ -1,2 +1,1 @@
 * Dry run to check config (low importance)
-* Preload rules and keep them in memory, reload on SIGHUP.

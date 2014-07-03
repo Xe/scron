@@ -5,6 +5,7 @@
 #include <sys/wait.h>
 
 #include <limits.h>
+#include <signal.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -37,6 +38,7 @@ struct ctabentry {
 };
 
 char *argv0;
+static sig_atomic_t reload;
 static TAILQ_HEAD(ctabhead, ctabentry) ctabhead;
 static char *config = "/etc/crontab";
 static int dflag;
@@ -204,6 +206,7 @@ unloadentries(void)
 
 	for (cte = TAILQ_FIRST(&ctabhead); cte; cte = tmp) {
 		tmp = TAILQ_NEXT(cte, entry);
+		TAILQ_REMOVE(&ctabhead, cte, entry);
 		free(cte->cmd);
 		free(cte);
 	}
@@ -300,6 +303,20 @@ loadentries(void)
 }
 
 static void
+reloadentries(void)
+{
+	unloadentries();
+	loadentries();
+}
+
+static void
+sighup(int sig)
+{
+	(void) sig;
+	reload = 1;
+}
+
+static void
 usage(void)
 {
 	fprintf(stderr, VERSION " (c) 2014\n");
@@ -337,11 +354,19 @@ main(int argc, char *argv[])
 		daemon(0, 0);
 	}
 
+	signal(SIGHUP, sighup);
+
 	loadentries();
 
 	while (1) {
 		t = time(NULL);
 		sleep(60 - t % 60);
+
+		if (reload == 1) {
+			reloadentries();
+			reload = 0;
+			continue;
+		}
 
 		TAILQ_FOREACH(cte, &ctabhead, entry) {
 			t = time(NULL);
