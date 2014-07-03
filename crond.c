@@ -54,17 +54,6 @@ loginfo(const char *fmt, ...)
 }
 
 static void
-logwarn(const char *fmt, ...)
-{
-	va_list ap;
-	va_start(ap, fmt);
-	if (dflag == 1)
-		vsyslog(LOG_WARNING, fmt, ap);
-	vfprintf(stderr, fmt, ap);
-	va_end(ap);
-}
-
-static void
 logerr(const char *fmt, ...)
 {
 	va_list ap;
@@ -110,7 +99,7 @@ runjob(char *cmd)
 
 	pid = fork();
 	if (pid < 0) {
-		logwarn("error: failed to fork job: %s at %s", cmd, ctime(&t));
+		logerr("error: failed to fork job: %s at %s", cmd, ctime(&t));
 	} else if (pid == 0) {
 		loginfo("run: %s pid: %d at %s", cmd, getpid, ctime(&t));
 		execl("/bin/sh", "/bin/sh", "-c", cmd, (char *)NULL);
@@ -243,7 +232,7 @@ loadentries(void)
 
 		col = strsep(&p, "\t");
 		if (!col || parsefield(col, 0, 59, &cte->min) < 0) {
-			logwarn("error: failed to parse `min' field on line %d\n", y + 1);
+			logerr("error: failed to parse `min' field on line %d\n", y + 1);
 			free(cte);
 			r = -1;
 			break;
@@ -251,7 +240,7 @@ loadentries(void)
 
 		col = strsep(&p, "\t");
 		if (!col || parsefield(col, 0, 23, &cte->hour) < 0) {
-			logwarn("error: failed to parse `hour' field on line %d\n", y + 1);
+			logerr("error: failed to parse `hour' field on line %d\n", y + 1);
 			free(cte);
 			r = -1;
 			break;
@@ -259,7 +248,7 @@ loadentries(void)
 
 		col = strsep(&p, "\t");
 		if (!col || parsefield(col, 1, 31, &cte->mday) < 0) {
-			logwarn("error: failed to parse `mday' field on line %d\n", y + 1);
+			logerr("error: failed to parse `mday' field on line %d\n", y + 1);
 			free(cte);
 			r = -1;
 			break;
@@ -267,7 +256,7 @@ loadentries(void)
 
 		col = strsep(&p, "\t");
 		if (!col || parsefield(col, 1, 12, &cte->mon) < 0) {
-			logwarn("error: failed to parse `mon' field on line %d\n", y + 1);
+			logerr("error: failed to parse `mon' field on line %d\n", y + 1);
 			free(cte);
 			r = -1;
 			break;
@@ -275,7 +264,7 @@ loadentries(void)
 
 		col = strsep(&p, "\t");
 		if (!col || parsefield(col, 0, 6, &cte->wday) < 0) {
-			logwarn("error: failed to parse `wday' field on line %d\n", y + 1);
+			logerr("error: failed to parse `wday' field on line %d\n", y + 1);
 			free(cte);
 			r = -1;
 			break;
@@ -283,7 +272,7 @@ loadentries(void)
 
 		col = strsep(&p, "\n");
 		if (!col) {
-			logwarn("error: missing `cmd' field on line %d\n", y + 1);
+			logerr("error: missing `cmd' field on line %d\n", y + 1);
 			free(cte);
 			r = -1;
 			break;
