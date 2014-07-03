@@ -103,7 +103,7 @@ runjob(char *cmd)
 		       cmd, ctime(&t));
 	} else if (pid == 0) {
 		loginfo("run: %s pid: %d at %s",
-			cmd, getpid, ctime(&t));
+			cmd, getpid(), ctime(&t));
 		execl("/bin/sh", "/bin/sh", "-c", cmd, (char *)NULL);
 		logerr("error: failed to execute job: %s at %s",
 		       cmd, ctime(&t));
