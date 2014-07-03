@@ -322,8 +322,8 @@ reloadentries(void)
 static void
 sighup(int sig)
 {
-	(void) sig;
-	reload = 1;
+	if (sig == SIGHUP)
+		reload = 1;
 }
 
 static void
