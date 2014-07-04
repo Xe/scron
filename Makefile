@@ -1,4 +1,4 @@
-CFLAGS += -Os -std=c99 -Wall -Wextra -pedantic
+CFLAGS += -Os -std=c99 -Wall -Wextra -pedantic -D_GNU_SOURCE
 LDFLAGS += -s -static
 
 all: crond
