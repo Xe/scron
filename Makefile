@@ -5,6 +5,7 @@ all: crond
 
 install: all
 	mkdir -p ${DESTDIR}/sbin
+	mkdir -p ${DESTDIR}/etc
 	install -m 755 crond ${DESTDIR}/sbin/
 	install -m 644 crontab ${DESTDIR}/etc/
 
