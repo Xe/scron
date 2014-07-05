@@ -23,7 +23,7 @@ struct field {
 	/* [low, high] */
 	int low;
 	int high;
-	/* for every `n' units */
+	/* for every `div' units */
 	int div;
 };
 
