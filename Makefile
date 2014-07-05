@@ -1,4 +1,4 @@
-CFLAGS = -Os -std=c99 -Wall -Wextra -pedantic -D_GNU_SOURCE
+CFLAGS = -Os -std=c99 -Wall -Wextra -pedantic -D_POSIX_C_SOURCE=200809L -D_BSD_SOURCE
 LDFLAGS = -s -static
 
 all: crond
