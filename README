@@ -3,7 +3,8 @@ scron
 
 about
 -----
-simple cron daemon
+simple cron daemon, originally forked from
+https://github.com/defer-/scron.git
 
 features
 --------
