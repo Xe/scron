@@ -323,8 +323,8 @@ loadentries(void)
 	if (r < 0)
 		unloadentries();
 
-	fclose(fp);
 	free(line);
+	fclose(fp);
 
 	return r;
 }
