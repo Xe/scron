@@ -199,14 +199,14 @@ parsefield(const char *field, long low, long high, struct field *f)
 		break;
 	case '*':
 		e1++;
-		if (e1[0] == '/') {
-			e1++;
-			errno = 0;
-			div = strtol(e1, &e2, 10);
-			if (e2[0] != '\0' || errno != 0)
-				return -1;
-			break;
-		}
+		if (e1[0] != '/')
+			return -1;
+		e1++;
+		errno = 0;
+		div = strtol(e1, &e2, 10);
+		if (e2[0] != '\0' || errno != 0)
+			return -1;
+		break;
 	case '\0':
 		break;
 	default:
