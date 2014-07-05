@@ -18,7 +18,7 @@ no mail support
 config
 ------
 syntax:
-value: * (wildcard), 30 (number) or 1-5 (range)
+value: * (wildcard), 30 (number), */N (repeat), or 1-5 (range)
 separator: \t (tab)
 
 example:
