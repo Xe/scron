@@ -23,6 +23,7 @@
 struct range {
 	int low;
 	int high;
+	int div;
 };
 
 struct ctabentry {
@@ -156,6 +157,8 @@ matchentry(struct ctabentry *cte, struct tm *tm)
 		if (matchtbl[i].r->high == -1) {
 			if (matchtbl[i].r->low == matchtbl[i].tm)
 				continue;
+			else if (matchtbl[i].tm % matchtbl[i].r->div == 0)
+				continue;
 		} else {
 			if (matchtbl[i].r->low <= matchtbl[i].tm &&
 			    matchtbl[i].r->high >= matchtbl[i].tm)
@@ -171,7 +174,7 @@ matchentry(struct ctabentry *cte, struct tm *tm)
 static int
 parsefield(const char *field, int low, int high, struct range *r)
 {
-	int min, max;
+	int min, max, div;
 	char *e1, *e2;
 
 	if (strcmp(field, "*") == 0) {
@@ -180,6 +183,7 @@ parsefield(const char *field, int low, int high, struct range *r)
 		return 0;
 	}
 
+	div = -1;
 	max = -1;
 	min = strtol(field, &e1, 10);
 
@@ -190,6 +194,15 @@ parsefield(const char *field, int low, int high, struct range *r)
 		if (e2[0] != '\0')
 			return -1;
 		break;
+	case '*':
+		e1++;
+		if (e1[0] == '/') {
+			e1++;
+			div = strtol(e1, &e2, 10);
+			if (e2[0] != '\0')
+				return -1;
+			break;
+		}
 	case '\0':
 		break;
 	default:
@@ -204,6 +217,7 @@ parsefield(const char *field, int low, int high, struct range *r)
 
 	r->low = min;
 	r->high = max;
+	r->div = div;
 	return 0;
 }
 
