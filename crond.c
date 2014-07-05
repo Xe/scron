@@ -19,19 +19,20 @@
 
 #define LEN(x) (sizeof (x) / sizeof *(x))
 
-/* [low, high] */
-struct range {
+struct field {
+	/* [low, high] */
 	int low;
 	int high;
+	/* for every `n' units */
 	int div;
 };
 
 struct ctabentry {
-	struct range min;
-	struct range hour;
-	struct range mday;
-	struct range mon;
-	struct range wday;
+	struct field min;
+	struct field hour;
+	struct field mday;
+	struct field mon;
+	struct field wday;
 	char *cmd;
 	TAILQ_ENTRY(ctabentry) entry;
 };
@@ -139,29 +140,29 @@ static int
 matchentry(struct ctabentry *cte, struct tm *tm)
 {
 	struct {
-		struct range *r;
+		struct field *f;
 		int tm;
 	} matchtbl[] = {
-		{ .r = &cte->min,  .tm = tm->tm_min  },
-		{ .r = &cte->hour, .tm = tm->tm_hour },
-		{ .r = &cte->mday, .tm = tm->tm_mday },
-		{ .r = &cte->mon,  .tm = tm->tm_mon  },
-		{ .r = &cte->wday, .tm = tm->tm_wday },
+		{ .f = &cte->min,  .tm = tm->tm_min  },
+		{ .f = &cte->hour, .tm = tm->tm_hour },
+		{ .f = &cte->mday, .tm = tm->tm_mday },
+		{ .f = &cte->mon,  .tm = tm->tm_mon  },
+		{ .f = &cte->wday, .tm = tm->tm_wday },
 	};
 	size_t i;
 
 	for (i = 0; i < LEN(matchtbl); i++) {
 		/* this is the match-any case, '*' */
-		if (matchtbl[i].r->low == -1 && matchtbl[i].r->high == -1)
+		if (matchtbl[i].f->low == -1 && matchtbl[i].f->high == -1)
 			continue;
-		if (matchtbl[i].r->high == -1) {
-			if (matchtbl[i].r->low == matchtbl[i].tm)
+		if (matchtbl[i].f->high == -1) {
+			if (matchtbl[i].f->low == matchtbl[i].tm)
 				continue;
-			else if (matchtbl[i].tm % matchtbl[i].r->div == 0)
+			else if (matchtbl[i].tm % matchtbl[i].f->div == 0)
 				continue;
 		} else {
-			if (matchtbl[i].r->low <= matchtbl[i].tm &&
-			    matchtbl[i].r->high >= matchtbl[i].tm)
+			if (matchtbl[i].f->low <= matchtbl[i].tm &&
+			    matchtbl[i].f->high >= matchtbl[i].tm)
 				continue;
 		}
 		break;
@@ -172,14 +173,14 @@ matchentry(struct ctabentry *cte, struct tm *tm)
 }
 
 static int
-parsefield(const char *field, int low, int high, struct range *r)
+parsefield(const char *field, int low, int high, struct field *f)
 {
 	int min, max, div;
 	char *e1, *e2;
 
 	if (strcmp(field, "*") == 0) {
-		r->low = -1;
-		r->high = -1;
+		f->low = -1;
+		f->high = -1;
 		return 0;
 	}
 
@@ -215,9 +216,9 @@ parsefield(const char *field, int low, int high, struct range *r)
 		if (max < low || max > high)
 			return -1;
 
-	r->low = min;
-	r->high = max;
-	r->div = div;
+	f->low = min;
+	f->high = max;
+	f->div = div;
 	return 0;
 }
 
