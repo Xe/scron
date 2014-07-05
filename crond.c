@@ -243,22 +243,22 @@ loadentries(void)
 {
 	struct ctabentry *cte;
 	FILE *fp;
-	char line[PATH_MAX], *p;
-	char *col;
-	int r = 0;
-	int y;
+	char *line = NULL, *p, *col;
+	int r = 0, y;
+	size_t size = 0;
+	ssize_t len;
 
 	if ((fp = fopen(config, "r")) == NULL) {
 		logerr("error: can't open %s\n", config);
 		return -1;
 	}
 
-	for (y = 0; fgets(line, sizeof(line), fp); y++) {
+	for (y = 0; (len = getline(&line, &size, fp)) != -1; y++) {
 		p = line;
 		if (line[0] == '#' || line[0] == '\n' || line[0] == '\0')
 			continue;
-		if (line[strlen(line) - 1] == '\n')
-			line[strlen(line) - 1] = '\0';
+		if(line[len - 1] == '\n')
+			line[--len] = '\0';
 
 		cte = emalloc(sizeof(*cte));
 
@@ -324,6 +324,7 @@ loadentries(void)
 		unloadentries();
 
 	fclose(fp);
+	free(line);
 
 	return r;
 }
