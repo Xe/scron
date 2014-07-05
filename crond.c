@@ -347,7 +347,7 @@ static void
 usage(void)
 {
 	fprintf(stderr, VERSION " (c) 2014\n");
-	fprintf(stderr, "usage: %s [-d] [-f file] [options]\n", argv0);
+	fprintf(stderr, "usage: %s [-d] [-f file]\n", argv0);
 	fprintf(stderr, "  -d	daemonize\n");
 	fprintf(stderr, "  -f	config file\n");
 	exit(EXIT_FAILURE);
