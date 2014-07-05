@@ -11,6 +11,7 @@
 #include <syslog.h>
 #include <time.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "arg.h"
 #include "queue.h"
@@ -191,16 +192,18 @@ parsefield(const char *field, int low, int high, struct field *f)
 	switch (e1[0]) {
 	case '-':
 		e1++;
+		errno = 0;
 		max = strtol(e1, &e2, 10);
-		if (e2[0] != '\0')
+		if (e2[0] != '\0' || errno != 0)
 			return -1;
 		break;
 	case '*':
 		e1++;
 		if (e1[0] == '/') {
 			e1++;
+			errno = 0;
 			div = strtol(e1, &e2, 10);
-			if (e2[0] != '\0')
+			if (e2[0] != '\0' || errno != 0)
 				return -1;
 			break;
 		}
