@@ -22,10 +22,10 @@
 
 struct field {
 	/* [low, high] */
-	int low;
-	int high;
+	long low;
+	long high;
 	/* for every `div' units */
-	int div;
+	long div;
 };
 
 struct ctabentry {
@@ -174,9 +174,9 @@ matchentry(struct ctabentry *cte, struct tm *tm)
 }
 
 static int
-parsefield(const char *field, int low, int high, struct field *f)
+parsefield(const char *field, long low, long high, struct field *f)
 {
-	int min, max, div;
+	long min, max, div;
 	char *e1, *e2;
 
 	if (strcmp(field, "*") == 0) {
