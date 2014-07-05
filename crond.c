@@ -16,7 +16,7 @@
 #include "arg.h"
 #include "queue.h"
 
-#define VERSION "0.1"
+#define VERSION "0.2"
 
 #define LEN(x) (sizeof (x) / sizeof *(x))
 
