@@ -391,7 +391,7 @@ main(int argc, char *argv[])
 	TAILQ_INIT(&ctabhead);
 
 	if (dflag == 1) {
-		openlog(argv[0], LOG_CONS | LOG_PID, LOG_DAEMON);
+		openlog(argv[0], LOG_CONS | LOG_PID, LOG_CRON);
 		daemon(0, 0);
 	}
 
