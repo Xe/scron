@@ -57,6 +57,17 @@ loginfo(const char *fmt, ...)
 }
 
 static void
+logwarn(const char *fmt, ...)
+{
+	va_list ap;
+	va_start(ap, fmt);
+	if (dflag == 1)
+		vsyslog(LOG_WARNING, fmt, ap);
+	vfprintf(stderr, fmt, ap);
+	va_end(ap);
+}
+
+static void
 logerr(const char *fmt, ...)
 {
 	va_list ap;
@@ -320,8 +331,11 @@ loadentries(void)
 		TAILQ_INSERT_TAIL(&ctabhead, cte, entry);
 	}
 
-	if (r < 0)
+	if (r < 0) {
+		if (reload == 1)
+			logwarn("warning: discarding old crontab entries\n");
 		unloadentries();
+	}
 
 	free(line);
 	fclose(fp);
