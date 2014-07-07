@@ -42,14 +42,14 @@ char *argv0;
 static sig_atomic_t reload;
 static TAILQ_HEAD(ctabhead, ctabentry) ctabhead;
 static char *config = "/etc/crontab";
-static int dflag;
+static int nflag;
 
 static void
 loginfo(const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
-	if (dflag == 1)
+	if (nflag == 0)
 		vsyslog(LOG_INFO, fmt, ap);
 	vfprintf(stdout, fmt, ap);
 	fflush(stdout);
@@ -61,7 +61,7 @@ logwarn(const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
-	if (dflag == 1)
+	if (nflag == 0)
 		vsyslog(LOG_WARNING, fmt, ap);
 	vfprintf(stderr, fmt, ap);
 	va_end(ap);
@@ -72,7 +72,7 @@ logerr(const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
-	if (dflag == 1)
+	if (nflag == 0)
 		vsyslog(LOG_ERR, fmt, ap);
 	vfprintf(stderr, fmt, ap);
 	va_end(ap);
@@ -361,9 +361,9 @@ static void
 usage(void)
 {
 	fprintf(stderr, VERSION " (c) 2014\n");
-	fprintf(stderr, "usage: %s [-d] [-f file]\n", argv0);
-	fprintf(stderr, "  -d	daemonize\n");
+	fprintf(stderr, "usage: %s [-f file] [-n]\n", argv0);
 	fprintf(stderr, "  -f	config file\n");
+	fprintf(stderr, "  -n	do not daemonize\n");
 	exit(EXIT_FAILURE);
 }
 
@@ -375,8 +375,8 @@ main(int argc, char *argv[])
 	struct tm *tm;
 
 	ARGBEGIN {
-	case 'd':
-		dflag = 1;
+	case 'n':
+		nflag = 1;
 		break;
 	case 'f':
 		config = EARGF(usage());
@@ -390,7 +390,7 @@ main(int argc, char *argv[])
 
 	TAILQ_INIT(&ctabhead);
 
-	if (dflag == 1) {
+	if (nflag == 0) {
 		openlog(argv[0], LOG_CONS | LOG_PID, LOG_CRON);
 		daemon(0, 0);
 	}
@@ -419,7 +419,7 @@ main(int argc, char *argv[])
 		waitjob();
 	}
 
-	if (dflag == 1)
+	if (nflag == 0)
 		closelog();
 
 	return EXIT_SUCCESS;
