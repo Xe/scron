@@ -333,11 +333,8 @@ loadentries(void)
 		TAILQ_INSERT_TAIL(&ctabhead, cte, entry);
 	}
 
-	if (r < 0) {
-		if (reload == 1)
-			logwarn("warning: discarding old crontab entries\n");
+	if (r < 0)
 		unloadentries();
-	}
 
 	free(line);
 	fclose(fp);
@@ -349,7 +346,8 @@ static void
 reloadentries(void)
 {
 	unloadentries();
-	loadentries();
+	if (loadentries() < 0)
+		logwarn("warning: discarding old crontab entries\n");
 }
 
 static void
