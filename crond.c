@@ -40,7 +40,7 @@ struct ctabentry {
 
 char *argv0;
 static sig_atomic_t reload;
-static TAILQ_HEAD(ctabhead, ctabentry) ctabhead;
+static TAILQ_HEAD(, ctabentry) ctabhead = TAILQ_HEAD_INITIALIZER(ctabhead);
 static char *config = "/etc/crontab";
 static int nflag;
 
@@ -387,8 +387,6 @@ main(int argc, char *argv[])
 
 	if (argc > 0)
 		usage();
-
-	TAILQ_INIT(&ctabhead);
 
 	if (nflag == 0) {
 		openlog(argv[0], LOG_CONS | LOG_PID, LOG_CRON);
