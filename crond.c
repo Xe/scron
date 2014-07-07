@@ -113,13 +113,13 @@ runjob(char *cmd)
 
 	pid = fork();
 	if (pid < 0) {
-		logerr("error: failed to fork job: %s at %s",
+		logerr("error: failed to fork job: %s time: %s",
 		       cmd, ctime(&t));
 	} else if (pid == 0) {
 		loginfo("run: %s pid: %d at %s",
 			cmd, getpid(), ctime(&t));
 		execl("/bin/sh", "/bin/sh", "-c", cmd, (char *)NULL);
-		logerr("error: failed to execute job: %s at %s",
+		logerr("error: failed to execute job: %s time: %s",
 		       cmd, ctime(&t));
 		_exit(EXIT_FAILURE);
 	}
@@ -141,7 +141,7 @@ waitjob(void)
 			continue;
 		}
 		if (WIFEXITED(status) == 1) {
-			loginfo("complete: pid: %d, return: %d time: %s",
+			loginfo("complete: pid: %d returned: %d time: %s",
 				pid, WEXITSTATUS(status), ctime(&t));
 			continue;
 		}
