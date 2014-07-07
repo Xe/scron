@@ -1,2 +1,5 @@
 * Support list items: 2,3,5,7,11
 * Dry run to check config (low importance)
+* Option to skip running commands if they are still executing
+* Detect clock changes
+* DST support?
