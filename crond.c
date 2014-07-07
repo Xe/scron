@@ -116,6 +116,7 @@ runjob(char *cmd)
 		logerr("error: failed to fork job: %s time: %s",
 		       cmd, ctime(&t));
 	} else if (pid == 0) {
+		setsid();
 		loginfo("run: %s pid: %d at %s",
 			cmd, getpid(), ctime(&t));
 		execl("/bin/sh", "/bin/sh", "-c", cmd, (char *)NULL);
