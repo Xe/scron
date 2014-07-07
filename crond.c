@@ -133,6 +133,7 @@ runjob(char *cmd)
 	if (pid < 0) {
 		logerr("error: failed to fork job: %s time: %s",
 		       cmd, ctime(&t));
+		return;
 	} else if (pid == 0) {
 		setsid();
 		loginfo("run: %s pid: %d at %s",
