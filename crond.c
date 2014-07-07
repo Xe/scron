@@ -2,6 +2,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include <errno.h>
 #include <limits.h>
 #include <signal.h>
 #include <stdarg.h>
@@ -11,7 +12,6 @@
 #include <syslog.h>
 #include <time.h>
 #include <unistd.h>
-#include <errno.h>
 
 #include "arg.h"
 #include "queue.h"
