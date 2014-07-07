@@ -40,6 +40,7 @@ struct ctabentry {
 
 char *argv0;
 static sig_atomic_t reload;
+static sig_atomic_t chldreap;
 static TAILQ_HEAD(, ctabentry) ctabhead = TAILQ_HEAD_INITIALIZER(ctabhead);
 static char *config = "/etc/crontab";
 static int nflag;
@@ -352,6 +353,13 @@ reloadentries(void)
 }
 
 static void
+sigchld(int sig)
+{
+	if (sig == SIGCHLD)
+		chldreap = 1;
+}
+
+static void
 sighup(int sig)
 {
 	if (sig == SIGHUP)
@@ -394,6 +402,7 @@ main(int argc, char *argv[])
 		daemon(0, 0);
 	}
 
+	signal(SIGCHLD, sigchld);
 	signal(SIGHUP, sighup);
 
 	loadentries();
@@ -402,9 +411,15 @@ main(int argc, char *argv[])
 		t = time(NULL);
 		sleep(60 - t % 60);
 
-		if (reload == 1) {
-			reloadentries();
-			reload = 0;
+		if (reload == 1 || chldreap == 1) {
+			if (reload == 1) {
+				reloadentries();
+				reload = 0;
+			}
+			if (chldreap == 1) {
+				waitjob();
+				chldreap = 0;
+			}
 			continue;
 		}
 
@@ -414,8 +429,6 @@ main(int argc, char *argv[])
 			if (matchentry(cte, tm) == 1)
 				runjob(cte->cmd);
 		}
-
-		waitjob();
 	}
 
 	if (nflag == 0)
