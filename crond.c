@@ -38,10 +38,17 @@ struct ctabentry {
 	TAILQ_ENTRY(ctabentry) entry;
 };
 
+struct jobentry {
+	char *cmd;
+	pid_t pid;
+	TAILQ_ENTRY(jobentry) entry;
+};
+
 char *argv0;
 static sig_atomic_t reload;
 static sig_atomic_t chldreap;
 static TAILQ_HEAD(, ctabentry) ctabhead = TAILQ_HEAD_INITIALIZER(ctabhead);
+static TAILQ_HEAD(, jobentry) jobhead = TAILQ_HEAD_INITIALIZER(jobhead);
 static char *config = "/etc/crontab";
 static int nflag;
 
@@ -107,10 +114,20 @@ estrdup(const char *s)
 static void
 runjob(char *cmd)
 {
+	struct jobentry *je;
 	time_t t;
 	pid_t pid;
 
 	t = time(NULL);
+
+	/* If command is already running, skip it */
+	TAILQ_FOREACH(je, &jobhead, entry) {
+		if (strcmp(je->cmd, cmd) == 0) {
+			loginfo("already running %s pid: %d at %s",
+				je->cmd, je->pid, ctime(&t));
+			return;
+		}
+	}
 
 	pid = fork();
 	if (pid < 0) {
@@ -125,11 +142,17 @@ runjob(char *cmd)
 		       cmd, ctime(&t));
 		_exit(EXIT_FAILURE);
 	}
+
+	je = emalloc(sizeof(*je));
+	je->cmd = estrdup(cmd);
+	je->pid = pid;
+	TAILQ_INSERT_TAIL(&jobhead, je, entry);
 }
 
 static void
 waitjob(void)
 {
+	struct jobentry *je, *tmp;
 	int status;
 	time_t t;
 	pid_t pid;
@@ -137,6 +160,18 @@ waitjob(void)
 	t = time(NULL);
 
 	while ((pid = waitpid(-1, &status, WNOHANG | WUNTRACED)) > 0) {
+		je = NULL;
+		TAILQ_FOREACH(tmp, &jobhead, entry) {
+			if (tmp->pid == pid) {
+				je = tmp;
+				break;
+			}
+		}
+		if (je) {
+			TAILQ_REMOVE(&jobhead, je, entry);
+			free(je->cmd);
+			free(je);
+		}
 		if (WIFSIGNALED(status) == 1) {
 			loginfo("complete: pid: %d terminated by signal: %d time: %s",
 				pid, WTERMSIG(status), ctime(&t));
