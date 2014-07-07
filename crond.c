@@ -262,7 +262,7 @@ loadentries(void)
 	ssize_t len;
 
 	if ((fp = fopen(config, "r")) == NULL) {
-		logerr("error: can't open %s\n", config);
+		logerr("error: can't open %s: %s\n", config, strerror(errno));
 		return -1;
 	}
 
