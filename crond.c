@@ -270,8 +270,6 @@ loadentries(void)
 		p = line;
 		if (line[0] == '#' || line[0] == '\n' || line[0] == '\0')
 			continue;
-		if(line[len - 1] == '\n')
-			line[--len] = '\0';
 
 		cte = emalloc(sizeof(*cte));
 
