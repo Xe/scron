@@ -45,11 +45,13 @@ struct jobentry {
 };
 
 char *argv0;
-static sig_atomic_t reload;
 static sig_atomic_t chldreap;
+static sig_atomic_t reload;
+static sig_atomic_t quit;
 static TAILQ_HEAD(, ctabentry) ctabhead = TAILQ_HEAD_INITIALIZER(ctabhead);
 static TAILQ_HEAD(, jobentry) jobhead = TAILQ_HEAD_INITIALIZER(jobhead);
 static char *config = "/etc/crontab";
+static char *pidfile = "/var/run/crond.pid";
 static int nflag;
 
 static void
@@ -93,6 +95,8 @@ emalloc(size_t size)
 	p = malloc(size);
 	if (!p) {
 		logerr("error: out of memory\n");
+		if (nflag == 0)
+			unlink(pidfile);
 		exit(EXIT_FAILURE);
 	}
 	return p;
@@ -106,6 +110,8 @@ estrdup(const char *s)
 	p = strdup(s);
 	if (!p) {
 		logerr("error: out of memory\n");
+		if (nflag == 0)
+			unlink(pidfile);
 		exit(EXIT_FAILURE);
 	}
 	return p;
@@ -385,17 +391,19 @@ reloadentries(void)
 }
 
 static void
-sigchld(int sig)
+sighandler(int sig)
 {
-	if (sig == SIGCHLD)
+	switch (sig) {
+	case SIGCHLD:
 		chldreap = 1;
-}
-
-static void
-sighup(int sig)
-{
-	if (sig == SIGHUP)
+		break;
+	case SIGHUP:
 		reload = 1;
+		break;
+	case SIGTERM:
+		quit = 1;
+		break;
+	}
 }
 
 static void
@@ -411,6 +419,7 @@ usage(void)
 int
 main(int argc, char *argv[])
 {
+	FILE *fp;
 	struct ctabentry *cte;
 	time_t t;
 	struct tm *tm;
@@ -430,18 +439,31 @@ main(int argc, char *argv[])
 		usage();
 
 	if (nflag == 0) {
+		if ((fp = fopen(pidfile, "w"))) {
+			fprintf(fp, "%d\n", getpid());
+			fclose(fp);
+		}
 		openlog(argv[0], LOG_CONS | LOG_PID, LOG_CRON);
 		daemon(1, 0);
 	}
 
-	signal(SIGCHLD, sigchld);
-	signal(SIGHUP, sighup);
+	signal(SIGCHLD, sighandler);
+	signal(SIGHUP, sighandler);
+	signal(SIGTERM, sighandler);
 
 	loadentries();
 
 	while (1) {
 		t = time(NULL);
 		sleep(60 - t % 60);
+
+		if (quit == 1) {
+			if (nflag == 0)
+				unlink(pidfile);
+			unloadentries();
+			/* Don't wait or kill forked processes, just exit */
+			break;
+		}
 
 		if (reload == 1 || chldreap == 1) {
 			if (reload == 1) {
