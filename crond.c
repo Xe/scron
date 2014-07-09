@@ -431,7 +431,7 @@ main(int argc, char *argv[])
 
 	if (nflag == 0) {
 		openlog(argv[0], LOG_CONS | LOG_PID, LOG_CRON);
-		daemon(0, 0);
+		daemon(1, 0);
 	}
 
 	signal(SIGCHLD, sigchld);
