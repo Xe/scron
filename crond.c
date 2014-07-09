@@ -442,12 +442,12 @@ main(int argc, char *argv[])
 		usage();
 
 	if (nflag == 0) {
+		openlog(argv[0], LOG_CONS | LOG_PID, LOG_CRON);
+		daemon(1, 0);
 		if ((fp = fopen(pidfile, "w"))) {
 			fprintf(fp, "%d\n", getpid());
 			fclose(fp);
 		}
-		openlog(argv[0], LOG_CONS | LOG_PID, LOG_CRON);
-		daemon(1, 0);
 	}
 
 	signal(SIGCHLD, sighandler);
