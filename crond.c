@@ -61,7 +61,8 @@ loginfo(const char *fmt, ...)
 	va_start(ap, fmt);
 	if (nflag == 0)
 		vsyslog(LOG_INFO, fmt, ap);
-	vfprintf(stdout, fmt, ap);
+	else
+		vfprintf(stdout, fmt, ap);
 	fflush(stdout);
 	va_end(ap);
 }
@@ -73,7 +74,8 @@ logwarn(const char *fmt, ...)
 	va_start(ap, fmt);
 	if (nflag == 0)
 		vsyslog(LOG_WARNING, fmt, ap);
-	vfprintf(stderr, fmt, ap);
+	else
+		vfprintf(stderr, fmt, ap);
 	va_end(ap);
 }
 
@@ -84,7 +86,8 @@ logerr(const char *fmt, ...)
 	va_start(ap, fmt);
 	if (nflag == 0)
 		vsyslog(LOG_ERR, fmt, ap);
-	vfprintf(stderr, fmt, ap);
+	else
+		vfprintf(stderr, fmt, ap);
 	va_end(ap);
 }
 
