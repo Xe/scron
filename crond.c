@@ -214,10 +214,11 @@ matchentry(struct ctabentry *cte, struct tm *tm)
 		/* this is the match-any case, '*' */
 		if (matchtbl[i].f->low == -1 && matchtbl[i].f->high == -1)
 			continue;
+		if (matchtbl[i].f->div > 0)
+			if (matchtbl[i].tm % matchtbl[i].f->div == 0)
+				continue;
 		if (matchtbl[i].f->high == -1) {
 			if (matchtbl[i].f->low == matchtbl[i].tm)
-				continue;
-			else if (matchtbl[i].tm % matchtbl[i].f->div == 0)
 				continue;
 		} else {
 			if (matchtbl[i].f->low <= matchtbl[i].tm &&
