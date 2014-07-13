@@ -277,6 +277,9 @@ parsefield(const char *field, long low, long high, struct field *f)
 	if (max != -1)
 		if (max < low || max > high)
 			return -1;
+	if (div != -1)
+		if (div < low || div > high)
+			return -1;
 
 	f->low = min;
 	f->high = max;
