@@ -182,16 +182,15 @@ waitjob(void)
 			free(je->cmd);
 			free(je);
 		}
-		if (WIFSIGNALED(status) == 1) {
-			loginfo("complete: pid: %d terminated by signal: %d time: %s",
-				pid, WTERMSIG(status), ctime(&t));
-			continue;
-		}
-		if (WIFEXITED(status) == 1) {
+		if (WIFEXITED(status) == 1)
 			loginfo("complete: pid: %d returned: %d time: %s",
 				pid, WEXITSTATUS(status), ctime(&t));
-			continue;
-		}
+		else if (WIFSIGNALED(status) == 1)
+			loginfo("complete: pid: %d terminated by signal: %d time: %s",
+				pid, WTERMSIG(status), ctime(&t));
+		else if (WIFSTOPPED(status) == 1)
+			loginfo("complete: pid: %d stopped by signal: %d time: %s",
+				pid, WSTOPSIG(status), ctime(&t));
 	}
 }
 
