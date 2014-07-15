@@ -151,12 +151,12 @@ runjob(char *cmd)
 		logerr("error: failed to execute job: %s time: %s",
 		       cmd, ctime(&t));
 		_exit(EXIT_FAILURE);
+	} else {
+		je = emalloc(sizeof(*je));
+		je->cmd = estrdup(cmd);
+		je->pid = pid;
+		TAILQ_INSERT_TAIL(&jobhead, je, entry);
 	}
-
-	je = emalloc(sizeof(*je));
-	je->cmd = estrdup(cmd);
-	je->pid = pid;
-	TAILQ_INSERT_TAIL(&jobhead, je, entry);
 }
 
 static void
