@@ -429,6 +429,7 @@ main(int argc, char *argv[])
 	struct ctabentry *cte;
 	time_t t;
 	struct tm *tm;
+	struct sigaction sa;
 
 	ARGBEGIN {
 	case 'n':
@@ -453,9 +454,11 @@ main(int argc, char *argv[])
 		}
 	}
 
-	signal(SIGCHLD, sighandler);
-	signal(SIGHUP, sighandler);
-	signal(SIGTERM, sighandler);
+	sa.sa_handler = sighandler;
+	sa.sa_flags = SA_RESTART;
+	sigaction(SIGCHLD, &sa, NULL);
+	sigaction(SIGHUP, &sa, NULL);
+	sigaction(SIGTERM, &sa, NULL);
 
 	loadentries();
 
