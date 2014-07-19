@@ -455,6 +455,7 @@ main(int argc, char *argv[])
 	}
 
 	sa.sa_handler = sighandler;
+	sigfillset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
 	sigaction(SIGCHLD, &sa, NULL);
 	sigaction(SIGHUP, &sa, NULL);
