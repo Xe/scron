@@ -210,19 +210,19 @@ matchentry(struct ctabentry *cte, struct tm *tm)
 	size_t i;
 
 	for (i = 0; i < LEN(matchtbl); i++) {
-		/* this is the match-any case, '*' */
-		if (matchtbl[i].f->low == -1 && matchtbl[i].f->high == -1)
-			continue;
-		if (matchtbl[i].f->div > 0)
-			if (matchtbl[i].tm % matchtbl[i].f->div == 0)
-				continue;
 		if (matchtbl[i].f->high == -1) {
-			if (matchtbl[i].f->low == matchtbl[i].tm)
+			if (matchtbl[i].f->low == -1) {
 				continue;
-		} else {
-			if (matchtbl[i].f->low <= matchtbl[i].tm &&
-			    matchtbl[i].f->high >= matchtbl[i].tm)
+			} else if (matchtbl[i].f->div > 0) {
+				if (matchtbl[i].tm > 0 || matchtbl[i].f->div % 2 == 0)
+					if (matchtbl[i].tm % matchtbl[i].f->div == 0)
+						continue;
+			} else if (matchtbl[i].f->low == matchtbl[i].tm) {
 				continue;
+			}
+		} else if (matchtbl[i].f->low <= matchtbl[i].tm &&
+				matchtbl[i].f->high >= matchtbl[i].tm) {
+			continue;
 		}
 		break;
 	}
