@@ -195,17 +195,29 @@ waitjob(void)
 }
 
 static int
+daysinmonth(int month, int year)
+{
+	int months[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+
+	if (year % 4 == 0)
+		if (!(year % 100 == 0 && year % 400 != 0))
+			months[1]++;
+	return months[month];
+}
+
+static int
 matchentry(struct ctabentry *cte, struct tm *tm)
 {
 	struct {
 		struct field *f;
 		int tm;
+		int len;
 	} matchtbl[] = {
-		{ .f = &cte->min,  .tm = tm->tm_min  },
-		{ .f = &cte->hour, .tm = tm->tm_hour },
-		{ .f = &cte->mday, .tm = tm->tm_mday },
-		{ .f = &cte->mon,  .tm = tm->tm_mon  },
-		{ .f = &cte->wday, .tm = tm->tm_wday },
+		{ .f = &cte->min,  .tm = tm->tm_min,  .len = 60 },
+		{ .f = &cte->hour, .tm = tm->tm_hour, .len = 24 },
+		{ .f = &cte->mday, .tm = tm->tm_mday, .len = daysinmonth(tm->tm_mon, tm->tm_year) },
+		{ .f = &cte->mon,  .tm = tm->tm_mon,  .len = 12 },
+		{ .f = &cte->wday, .tm = tm->tm_wday, .len = 7  },
 	};
 	size_t i;
 
@@ -214,9 +226,13 @@ matchentry(struct ctabentry *cte, struct tm *tm)
 			if (matchtbl[i].f->low == -1) {
 				continue;
 			} else if (matchtbl[i].f->div > 0) {
-				if (matchtbl[i].tm > 0 || matchtbl[i].f->div % 2 == 0)
+				if (matchtbl[i].tm > 0) {
 					if (matchtbl[i].tm % matchtbl[i].f->div == 0)
 						continue;
+				} else {
+					if (matchtbl[i].len % matchtbl[i].f->div == 0)
+						continue;
+				}
 			} else if (matchtbl[i].f->low == matchtbl[i].tm) {
 				continue;
 			}
