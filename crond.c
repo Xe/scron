@@ -463,7 +463,10 @@ main(int argc, char *argv[])
 
 	if (nflag == 0) {
 		openlog(argv[0], LOG_CONS | LOG_PID, LOG_CRON);
-		daemon(1, 0);
+		if (daemon(1, 0) != 0) {
+			logerr("error: failed to daemonize %s\n", strerror(errno));
+			return EXIT_FAILURE;
+		}
 		if ((fp = fopen(pidfile, "w"))) {
 			fprintf(fp, "%d\n", getpid());
 			fclose(fp);
