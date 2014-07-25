@@ -195,14 +195,24 @@ waitjob(void)
 }
 
 static int
-daysinmonth(int month, int year)
+isleap(int year)
 {
-	int months[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+	if(year % 400 == 0)
+		return 1;
+	if(year % 100 == 0)
+		return 0;
+	return (year % 4 == 0);
+}
 
-	if (year % 4 == 0)
-		if (!(year % 100 == 0 && year % 400 != 0))
-			months[1]++;
-	return months[month];
+static int
+daysinmon(int mon, int year)
+{
+	int days[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+	if (year < 1900)
+		year += 1900;
+	if (isleap(year))
+		days[1] = 29;
+	return days[mon];
 }
 
 static int
@@ -215,7 +225,7 @@ matchentry(struct ctabentry *cte, struct tm *tm)
 	} matchtbl[] = {
 		{ .f = &cte->min,  .tm = tm->tm_min,  .len = 60 },
 		{ .f = &cte->hour, .tm = tm->tm_hour, .len = 24 },
-		{ .f = &cte->mday, .tm = tm->tm_mday, .len = daysinmonth(tm->tm_mon, tm->tm_year) },
+		{ .f = &cte->mday, .tm = tm->tm_mday, .len = daysinmon(tm->tm_mon, tm->tm_year) },
 		{ .f = &cte->mon,  .tm = tm->tm_mon,  .len = 12 },
 		{ .f = &cte->wday, .tm = tm->tm_wday, .len = 7  },
 	};
