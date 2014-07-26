@@ -197,9 +197,9 @@ waitjob(void)
 static int
 isleap(int year)
 {
-	if(year % 400 == 0)
+	if (year % 400 == 0)
 		return 1;
-	if(year % 100 == 0)
+	if (year % 100 == 0)
 		return 0;
 	return (year % 4 == 0);
 }
@@ -473,7 +473,7 @@ main(int argc, char *argv[])
 
 	if (nflag == 0) {
 		openlog(argv[0], LOG_CONS | LOG_PID, LOG_CRON);
-		if (daemon(1, 0) != 0) {
+		if (daemon(1, 0) < 0) {
 			logerr("error: failed to daemonize %s\n", strerror(errno));
 			return EXIT_FAILURE;
 		}
