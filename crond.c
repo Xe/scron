@@ -186,11 +186,11 @@ waitjob(void)
 			loginfo("complete: pid: %d returned: %d time: %s",
 				pid, WEXITSTATUS(status), ctime(&t));
 		else if (WIFSIGNALED(status) == 1)
-			loginfo("complete: pid: %d terminated by signal: %d time: %s",
-				pid, WTERMSIG(status), ctime(&t));
+			loginfo("complete: pid: %d terminated by signal: %s time: %s",
+				pid, strsignal(WTERMSIG(status)), ctime(&t));
 		else if (WIFSTOPPED(status) == 1)
-			loginfo("complete: pid: %d stopped by signal: %d time: %s",
-				pid, WSTOPSIG(status), ctime(&t));
+			loginfo("complete: pid: %d stopped by signal: %s time: %s",
+				pid, strsignal(WSTOPSIG(status)), ctime(&t));
 	}
 }
 
